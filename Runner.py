@@ -1,13 +1,14 @@
 #from bs4 import BeautifulSoup
 import requests
 import json
+import time
 from SessionPPN_call import refreshT
 
 
 import certifi #brauche ich gerade wohl nicht
 import urllib3 #brauche ich gerade wohl nicht
 
-def RequestCopy(atoken, url):
+def RequestCopy(atoken, url, s):
     http = urllib3.PoolManager()
 
 
@@ -23,19 +24,21 @@ def RequestCopy(atoken, url):
         'Authorization': atoken
     }
 
-    p = requests.get(url, headers=headers,  verify=False)
+    p = s.get(url, headers=headers,  verify=False)
     print(p)
     with open('Info.txt', 'w') as f:
         f.write(p.text)
-
+    with open('Info.txt', 'r' ) as c:
+        obj = json.load(c)
+        print(obj['message']['idents'])
+        for elements in obj['message']['idents']:
+            print(elements)
     # r = http.request('GET', 'https://api.chargepoint-management.com/status/connectionStatusList', headers=headers)
     # print(r.headers)
     # print(json.loads(r.data))
 if __name__ == '__main__':
-    list = ["https://api.chargepoint-management.com/maintenance/v1/measurements/DE9110000167_LMS01?lmsGlobalId=de91100001670001010f",
-            "https://api.chargepoint-management.com/maintenance/v1/measurements/DE9110000168_LMS01?lmsGlobalId=de91100001670001010f",
-            "https://api.chargepoint-management.com/maintenance/v1/measurements/DE9110000169_LMS01?lmsGlobalId=de91100001670001010f",
-            "https://api.chargepoint-management.com/maintenance/v1/measurements/DE9110000170_LMS01?lmsGlobalId=de91100001670001010f"]
+    list = ["https://api.chargepoint-management.com/maintenance/v1/measurements/DE9110000167_LMS01?lmsGlobalId=de91100001670005010f"
+            ]
     s = requests.session()
     refreshT(s)
     with open('token2.txt', 'r') as jsonf:
@@ -45,4 +48,5 @@ if __name__ == '__main__':
     atoken = 'Bearer ' + data['access_token']
     for url in list:
         print(url)
-        RequestCopy(atoken,url)
+        RequestCopy(atoken,url,s)
+        #time.sleep(1)
