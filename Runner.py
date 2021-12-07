@@ -26,18 +26,19 @@ def RequestCopy(atoken, url, s):
 
     p = s.get(url, headers=headers,  verify=False)
     print(p)
-    with open('Info.txt', 'w') as f:
+    with open('Info.json', 'w') as f:
         f.write(p.text)
-    with open('Info.txt', 'r' ) as c:
+    with open('Info.json', 'r' ) as c:
         obj = json.load(c)
-        print(obj['message']['idents'])
-        for elements in obj['message']['idents']:
-            print(elements)
+        print(obj['content'])
+        for elements in obj['content']:
+            if elements['power'] == 320:
+                print(elements['uniqueId'] + ":" + elements['chargingFacilities']['power'])
     # r = http.request('GET', 'https://api.chargepoint-management.com/status/connectionStatusList', headers=headers)
     # print(r.headers)
     # print(json.loads(r.data))
 if __name__ == '__main__':
-    list = ["https://api.chargepoint-management.com/maintenance/v1/measurements/DE9110000167_LMS01?lmsGlobalId=de91100001670005010f"
+    list = ["https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=100&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=FAULTED"
             ]
     s = requests.session()
     refreshT(s)
