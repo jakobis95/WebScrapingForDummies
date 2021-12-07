@@ -1,12 +1,9 @@
 import json
 from Runner import refreshT
+from openpyxl import Workbook,load_workbook
 import requests
 
-def BackendRequestTemplate(atoken, url, s, i):
-    #http = urllib3.PoolManager()
-
-
-    #url = 'https://api.chargepoint-management.com/maintenance/v1/measurements/ES9110000135_LMS01?lmsGlobalId=00000000000e0005010f'
+def BackendRequestTemplate(atoken, url, s):
     headers = {
         'authority': 'api.chargepoint-management.com',
         'accept': 'application/json, text/plain, */*',
@@ -19,19 +16,60 @@ def BackendRequestTemplate(atoken, url, s, i):
     }
 
     p = s.get(url, headers=headers,  verify=False)
-    print(p)
-    Zustand = ["fehler.json", "offline.json", "alle.json"]
-    with open(Zustand[i], 'w') as f:
-        f.write(p.text)
-    with open(Zustand[i], 'r' ) as c:
-        obj = json.load(c)
-        print(Zustand[i] + ":::::::::")
-        for elements in obj['content']:
-            if str(elements['uniqueId'])[13:15] == "CP" and int(elements['masterData']['chargingFacilities'][0]['power']) < 350 and str(elements['firmwareVersion']) != "":
-                print(str(elements['masterData']['chargingFacilities'][0]['power']) + ":" + str(elements['uniqueId']) + ":" + str(elements['masterData']['chargePointName']) + " : " + str(elements['firmwareVersion']))
+    #print(p)
+    #print("return P.TEXT")
+    return p
 
-    # r = http.request('GET', 'https://api.chargepoint-management.com/status/connectionStatusList', headers=headers)
-    # print(r.headers)
-    # print(json.loads(r.data))
+def auswertungBackenddaten(data, atoken, s):
+    uniqueIdlcp = ""
+    humidity = "first"
+    print("Auswertung")
+    i = 1
+    wb = load_workbook(filename='PythonZuExcel.xlsx')
+    Tabellenblatt = wb.active
+    obj = data.json()
+    print("alle standorte:::::::::")
+    for elements in obj['content']:
+        if str(elements['uniqueId'])[13:15] == "CP" and int(elements['masterData']['chargingFacilities'][0]['power']) < 350 and str(elements['firmwareVersion']) != "":
+            if str(elements['uniqueId'])[:12] == uniqueIdlcp[:12]:
+                Tabellenblatt.cell(row=i-1, column=5).value = "CPN012"
+            else:
+                #print("https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:13] + "LMS01?lmsGlobalId=00000000000e0005010f")
+                url = "https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:13] + "LMS01?lmsGlobalId=00000000000e0005010f"
+                measurement = BackendRequestTemplate(atoken, url, s)
+                measurementJ = measurement.json()
+                content = measurementJ['message']
+                if content == None:
+                    humidity = 255
+                else:
+                    #print(content['idents'][14]['value'])
+                    humidity = content['idents'][14]['value']
+                    #l = 0
+                    #for dataM in content['idents']:
+                     #   print(str(dataM) + ':' + str(l))
+                      #  l = l +1
+           # print(str(elements['masterData']['chargingFacilities'][0]['power']) + ":" + str(elements['uniqueId']) + ":" + str(elements['masterData']['chargePointName']) + " : " + str(elements['firmwareVersion']))
+                Tabellenblatt.cell(row=i, column=1).value = str(elements['masterData']['chargingFacilities'][0]['power'])
+                Tabellenblatt.cell(row=i, column=2).value = str(elements['uniqueId'])
+                Tabellenblatt.cell(row=i, column=3).value = str(elements['masterData']['chargePointName'])
+                Tabellenblatt.cell(row=i, column=4).value = str(elements['firmwareVersion'])
+                Tabellenblatt.cell(row=i, column=5).value = str(elements['uniqueId'])[13:17]
+                Tabellenblatt.cell(row=i, column=6).value = int(humidity)
+                uniqueIdlcp = str(elements['uniqueId'])
+                i = i+1
+
+    wb.save('PythonZuExcel.xlsx')
 
 if __name__ == "__main__":
+    i = 0
+    url = "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=20&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=ACTIVE&status=FAULTED&status=INACTIVE"
+
+    s = requests.session()
+    refreshT(s)
+    with open('token2.txt', 'r') as jsonf:
+        data = json.load(jsonf)
+        print("vergleich")
+        print(data['refresh_token'])
+    atoken = 'Bearer ' + data['access_token']
+    data = BackendRequestTemplate(atoken, url, s)
+    auswertungBackenddaten(data, atoken, s)

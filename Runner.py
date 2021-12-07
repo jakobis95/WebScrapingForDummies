@@ -9,7 +9,7 @@ import certifi #brauche ich gerade wohl nicht
 import urllib3 #brauche ich gerade wohl nicht
 class urlHandler(object):
     def __init__(self):
-
+        intern = intern
     def LS1_Measurement(self, ID):
         url = "https://api.chargepoint-management.com/maintenance/v1/measurements/" + ID + "?lmsGlobalId=00000000000e0003010a"
         return url
