@@ -7,27 +7,27 @@ import time
 
 import certifi #brauche ich gerade wohl nicht
 import urllib3 #brauche ich gerade wohl nicht
-class urlHandler(object):
-    def __init__(self):
-        intern = intern
-    def LS1_Measurement(self, ID):
-        url = "https://api.chargepoint-management.com/maintenance/v1/measurements/" + ID + "?lmsGlobalId=00000000000e0003010a"
-        return url
-    def LS2_Measurement(self, ID):
-        url = "https://api.chargepoint-management.com/maintenance/v1/measurements/" + ID + "?lmsGlobalId=00000000000e0003020a"
-        return url
-    def CB_Measurement(self, ID):
-        url = "https://api.chargepoint-management.com/maintenance/v1/measurements/" + ID + "?lmsGlobalId=00000000000e0005010f"
-        return url
-    def inactive_Chargepoints(self):
-        url = "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=INACTIVE"
-        return url
-    def faulted_Chargepoints(self):
-        url = "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=FAULTED"
-        return url
-    def all_DC_Chargepoints(self):
-        url = "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=ACTIVE&status=FAULTED&status=INACTIVE"
-        return url
+# class urlHandler(object):
+#     def __init__(self):
+#         intern = intern
+#     def LS1_Measurement(self, ID):
+#         url = "https://api.chargepoint-management.com/maintenance/v1/measurements/" + ID + "?lmsGlobalId=00000000000e0003010a"
+#         return url
+#     def LS2_Measurement(self, ID):
+#         url = "https://api.chargepoint-management.com/maintenance/v1/measurements/" + ID + "?lmsGlobalId=00000000000e0003020a"
+#         return url
+#     def CB_Measurement(self, ID):
+#         url = "https://api.chargepoint-management.com/maintenance/v1/measurements/" + ID + "?lmsGlobalId=00000000000e0005010f"
+#         return url
+#     def inactive_Chargepoints(self):
+#         url = "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=INACTIVE"
+#         return url
+#     def faulted_Chargepoints(self):
+#         url = "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=FAULTED"
+#         return url
+#     def all_DC_Chargepoints(self):
+#         url = "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=ACTIVE&status=FAULTED&status=INACTIVE"
+#         return url
 
 def BackendRequestTemplate(atoken, url, s, i):
     http = urllib3.PoolManager()
@@ -100,8 +100,7 @@ def refreshT(s): # Hier wird der Token refreshed
 if __name__ == '__main__':
     i = 0
     list = ["https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=FAULTED",
-            "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=INACTIVE",
-            "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=ACTIVE&status=FAULTED&status=INACTIVE"
+            "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=INACTIVE"
             ]
     s = requests.session()
     refreshT(s)
