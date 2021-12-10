@@ -50,18 +50,9 @@ def auswertungBackenddaten(obj, atoken, s):
     j = 0
     CPlist = []
     for elements in obj:
-        if str(elements['uniqueId'])[13:15] == "CP" and int(elements['masterData']['chargingFacilities'][0]['power']) < 350 and str(elements['firmwareVersion']) != "":
-            if str(elements['uniqueId'])[:14] == uniqueIdlcp[:14]:
-                Tabellenblatt.cell(row=i-1, column=6).value = "CPN012"
-            else:
-                #CPlist.append(elements)
-                url = "https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:13] + "LMS01/request?lmsGlobalId=0000000000000005010f&force=true"
-                update_message = BackendRequestTemplate(atoken, url, s)
-                j = j + 1
-                #print(update_message.text + " : " + str(j) + "/220")
-                #time.sleep(1)
-            uniqueIdlcp = str(elements['uniqueId'])
-    print(CPlist)
+        url = "https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:13] + "LMS01/request?lmsGlobalId=0000000000000005010f&force=true"
+        update_message = BackendRequestTemplate(atoken, url, s)
+        #time.sleep(1)
     print("alle standorte:::::::::")
     for elements in obj:
         if str(elements['uniqueId'])[13:15] == "CP" and int(elements['masterData']['chargingFacilities'][0]['power']) < 350 and str(elements['firmwareVersion']) != "":
@@ -77,30 +68,25 @@ def auswertungBackenddaten(obj, atoken, s):
                     humidity = 255
                 else:
 
-                    if(content['idents'][14]['value'] == "Closed"):
+                    if content['idents'][14]['value'] == "Closed" or content['idents'][14]['value'] == "":
                         print(content['idents'][14]['value'])
                         humidity = 999
                     else:
                         print(content['idents'][14]['value'])
                         humidity = content['idents'][14]['value']
-                    #l = 0
-                    #for dataM in content['idents']:
-                     #   print(str(dataM) + ':' + str(l))
-                      #  l = l +1
+
 
 
                 #print(humidity)
-                print(str(elements['masterData']['chargingFacilities'][0]['power']) + ":" + str(elements['uniqueId']) + ":" + str(elements['masterData']['chargePointName']) + " : " + str(elements['firmwareVersion']) + " : " + str(humidity) )
-           #      Tabellenblatt.cell(row=i, column=1).value = str(elements['uniqueId'])[:2]
-           #      Tabellenblatt.cell(row=i, column=2).value = str(elements['masterData']['chargingFacilities'][0]['power'])
-           #      Tabellenblatt.cell(row=i, column=3).value = str(elements['uniqueId'])
-           #      Tabellenblatt.cell(row=i, column=4).value = str(elements['masterData']['chargePointName'])
-           #      Tabellenblatt.cell(row=i, column=5).value = str(elements['firmwareVersion'])
-           #      Tabellenblatt.cell(row=i, column=6).value = str(elements['uniqueId'])[13:]
-           #      Tabellenblatt.cell(row=i, column=7).value = int(humidity)
+                CPlist.append(str(elements['masterData']['chargingFacilities'][0]['power']) + ":" + str(elements['uniqueId']) + ":" + str(elements['masterData']['chargePointName']) + " : " + str(elements['firmwareVersion']) + " : " + str(humidity) )
+                Tabellenblatt.cell(row=i, column=1+8).value = str(elements['uniqueId'])[:2]
+                Tabellenblatt.cell(row=i, column=2+8).value = str(elements['masterData']['chargingFacilities'][0]['power'])
+                Tabellenblatt.cell(row=i, column=3+8).value = str(elements['uniqueId'])
+                Tabellenblatt.cell(row=i, column=4+8).value = str(elements['masterData']['chargePointName'])
+                Tabellenblatt.cell(row=i, column=5+8).value = str(elements['firmwareVersion'])
+                Tabellenblatt.cell(row=i, column=6+8).value = str(elements['uniqueId'])[13:]
+                Tabellenblatt.cell(row=i, column=7+8).value = int(humidity)
 
-                uniqueIdlcp = str(elements['uniqueId'])
-                i = i+1
 
     wb.save('PythonZuExcel.xlsx')
 
