@@ -79,14 +79,14 @@ def auswertungBackenddaten(obj, atoken, s):
 
                 #print(humidity)
                 CPlist.append(str(elements['masterData']['chargingFacilities'][0]['power']) + ":" + str(elements['uniqueId']) + ":" + str(elements['masterData']['chargePointName']) + " : " + str(elements['firmwareVersion']) + " : " + str(humidity) )
-                Tabellenblatt.cell(row=i, column=1+8).value = str(elements['uniqueId'])[:2]
-                Tabellenblatt.cell(row=i, column=2+8).value = str(elements['masterData']['chargingFacilities'][0]['power'])
-                Tabellenblatt.cell(row=i, column=3+8).value = str(elements['uniqueId'])
-                Tabellenblatt.cell(row=i, column=4+8).value = str(elements['masterData']['chargePointName'])
-                Tabellenblatt.cell(row=i, column=5+8).value = str(elements['firmwareVersion'])
-                Tabellenblatt.cell(row=i, column=6+8).value = str(elements['uniqueId'])[13:]
-                Tabellenblatt.cell(row=i, column=7+8).value = int(humidity)
-
+                Tabellenblatt.cell(row=i, column=1).value = str(elements['uniqueId'])[:2]
+                Tabellenblatt.cell(row=i, column=2).value = str(elements['masterData']['chargingFacilities'][0]['power'])
+                Tabellenblatt.cell(row=i, column=3).value = str(elements['uniqueId'])
+                Tabellenblatt.cell(row=i, column=4).value = str(elements['masterData']['chargePointName'])
+                Tabellenblatt.cell(row=i, column=5).value = str(elements['firmwareVersion'])
+                Tabellenblatt.cell(row=i, column=6).value = str(elements['uniqueId'])[13:]
+                Tabellenblatt.cell(row=i, column=7).value = int(humidity)
+                i = i+1
 
     wb.save('PythonZuExcel.xlsx')
 

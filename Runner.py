@@ -31,7 +31,7 @@ def cpstate(fehlerstandorte):
         url = ("https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:12] + "_LMS01?lmsGlobalId=de911000016700030" +str(elements['uniqueId'])[17] + "0a")
         print(url)
         CPdata = s.get(url, headers=headers, verify=False)
-        time.sleep(0.3)
+        time.sleep(2)
         CPdataJ = CPdata.json()
         if CPdataJ['message'] == None:
             Status = "Error"
@@ -127,6 +127,6 @@ if __name__ == '__main__':
     atoken = 'Bearer ' + data['access_token']
     i = 0
     fehlerstandorte = BackendRequestTemplate(atoken,urllist[0],s,i, "fehler")
-    #i = 1
-    #BackendRequestTemplate(atoken, urllist[1], s, i ,"offline")
+    i = 1
+    BackendRequestTemplate(atoken, urllist[1], s, i ,"offline")
     cpstate(fehlerstandorte)
