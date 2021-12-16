@@ -5,21 +5,10 @@ import requests
 import time
 def OnlyUsableDestinations(data):
     obj = data.json()
-    uniqueIdlcp = "empty"
     CPlist = []
     for elements in obj['content']:
-        if str(elements['uniqueId'])[13:15] == "CP" and int(elements['masterData']['chargingFacilities'][0]['power']) < 350 and str(elements['firmwareVersion']) != "":
-            if not str(elements['uniqueId'])[:13] == uniqueIdlcp[:13]:
-                CPlist.append(elements)
-                #url = "https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:13] + "LMS01/request?lmsGlobalId=0000000000000005010f&force=true"
-                #update_message = BackendRequestTemplate(atoken, url, s)
-                #j = j + 1
-                #print(update_message.text + " : " + str(j) + "/220")
-                #time.sleep(1)
-        uniqueIdlcp = str(elements['uniqueId'])
-
-    for elements in CPlist:
-        print(elements['uniqueId'][:13])
+        if str(elements['uniqueId'])[13:15] == "CP" and int(elements['masterData']['chargingFacilities'][0]['power']) < 350 and str(elements['firmwareVersion']) != "" and int(elements['masterData']['chargingFacilities'][0]['power']) > 150:
+            CPlist.append(elements)
 
     return CPlist
 def BackendRequestTemplate(atoken, url, s):
@@ -50,50 +39,41 @@ def auswertungBackenddaten(obj, atoken, s):
     j = 0
     CPlist = []
     for elements in obj:
-        url = "https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:13] + "LMS01/request?lmsGlobalId=0000000000000005010f&force=true"
-        update_message = BackendRequestTemplate(atoken, url, s)
-        #time.sleep(1)
-    print("alle standorte:::::::::")
-    for elements in obj:
-        if str(elements['uniqueId'])[13:15] == "CP" and int(elements['masterData']['chargingFacilities'][0]['power']) < 350 and str(elements['firmwareVersion']) != "":
-            if str(elements['uniqueId'])[:12] == uniqueIdlcp[:12]:
-                Tabellenblatt.cell(row=i-1, column=6).value = "CPN012"
+        if str(elements['uniqueId'])[13:18] == "CPN01":
+            url = "https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:13] + "LMS01/request?lmsGlobalId=0000000000000005010f&force=true"
+            update_message = BackendRequestTemplate(atoken, url, s)
+            #time.sleep(1)
+        if str(elements['uniqueId'])[13:18] == "CPN01":
+            url = "https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:13] + "LMS01?lmsGlobalId=00000000000e0005010f"
+            measurement = BackendRequestTemplate(atoken, url, s)
+            measurementJ = measurement.json()
+            content = measurementJ['message']
+            if content == None:
+                humidity = 255
             else:
-                #print("https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:13] + "LMS01?lmsGlobalId=00000000000e0005010f")
-                url = "https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:13] + "LMS01?lmsGlobalId=00000000000e0005010f"
-                measurement = BackendRequestTemplate(atoken, url, s)
-                measurementJ = measurement.json()
-                content = measurementJ['message']
-                if content == None:
-                    humidity = 255
+                if content['idents'][14]['value'] == "Closed" or content['idents'][14]['value'] == "":
+                    print(content['idents'][14]['value'])
+                    humidity = 999
                 else:
+                    print(content['idents'][14]['value'])
+                    humidity = content['idents'][14]['value']
 
-                    if content['idents'][14]['value'] == "Closed" or content['idents'][14]['value'] == "":
-                        print(content['idents'][14]['value'])
-                        humidity = 999
-                    else:
-                        print(content['idents'][14]['value'])
-                        humidity = content['idents'][14]['value']
-
-
-
-                #print(humidity)
-                CPlist.append(str(elements['masterData']['chargingFacilities'][0]['power']) + ":" + str(elements['uniqueId']) + ":" + str(elements['masterData']['chargePointName']) + " : " + str(elements['firmwareVersion']) + " : " + str(humidity) )
-                Tabellenblatt.cell(row=i, column=1).value = str(elements['uniqueId'])[:2]
-                Tabellenblatt.cell(row=i, column=2).value = str(elements['masterData']['chargingFacilities'][0]['power'])
-                Tabellenblatt.cell(row=i, column=3).value = str(elements['uniqueId'])
-                Tabellenblatt.cell(row=i, column=4).value = str(elements['masterData']['chargePointName'])
-                Tabellenblatt.cell(row=i, column=5).value = str(elements['firmwareVersion'])
-                Tabellenblatt.cell(row=i, column=6).value = str(elements['uniqueId'])[13:]
-                Tabellenblatt.cell(row=i, column=7).value = int(humidity)
-                i = i+1
+        print(humidity)
+        Tabellenblatt.cell(row=i, column=1).value = str(elements['uniqueId'])[:2]
+        Tabellenblatt.cell(row=i, column=2).value = str(elements['masterData']['chargingFacilities'][0]['power'])
+        Tabellenblatt.cell(row=i, column=3).value = str(elements['uniqueId'])
+        Tabellenblatt.cell(row=i, column=4).value = str(elements['masterData']['chargePointName'])
+        Tabellenblatt.cell(row=i, column=5).value = str(elements['firmwareVersion'])
+        Tabellenblatt.cell(row=i, column=6).value = str(elements['uniqueId'])[13:]
+        Tabellenblatt.cell(row=i, column=7).value = int(humidity)
+        i = i+1
 
     wb.save('PythonZuExcel.xlsx')
 
 if __name__ == "__main__":
     i = 0
-    url = "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=1000&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=ACTIVE&status=FAULTED&status=INACTIVE"
-
+    #url = "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=1000&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=ACTIVE&status=FAULTED&status=INACTIVE"
+    url = "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=1000&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC"
     s = requests.session()
     refreshT(s)
     with open('token2.txt', 'r') as jsonf:
