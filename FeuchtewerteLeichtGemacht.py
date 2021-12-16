@@ -2,6 +2,8 @@ import json
 from Runner import refreshT
 from openpyxl import Workbook,load_workbook
 import requests
+from NavigateInExcel import searchXL
+from datetime import datetime
 import time
 def OnlyUsableDestinations(data):
     obj = data.json()
@@ -34,38 +36,57 @@ def auswertungBackenddaten(obj, atoken, s):
     print("Auswertung")
     i = 1
     wb = load_workbook(filename='PythonZuExcel.xlsx')
-    Tabellenblatt = wb.active
+    FeuchteTbl = wb.worksheets[0]
+    FeedbackTbl = wb.worksheets[1]
+
     #obj = data.json()
-    j = 0
+
+    searchTerm = "Feuchte " + datetime.today().strftime('%d.%m.%Y')
+    TodayCol = searchXL(FeuchteTbl, searchTerm)[1]
+
+    j = 1
     CPlist = []
     for elements in obj:
         if str(elements['uniqueId'])[13:18] == "CPN01":
             url = "https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:13] + "LMS01/request?lmsGlobalId=0000000000000005010f&force=true"
             update_message = BackendRequestTemplate(atoken, url, s)
-            #time.sleep(1)
-        if str(elements['uniqueId'])[13:18] == "CPN01":
-            url = "https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:13] + "LMS01?lmsGlobalId=00000000000e0005010f"
-            measurement = BackendRequestTemplate(atoken, url, s)
-            measurementJ = measurement.json()
-            content = measurementJ['message']
-            if content == None:
-                humidity = 255
+            print(str(elements['uniqueId'])[13:18] + " i=" + str(j))
+            CPlist.append(elements)
+            j= j +1
+    i = 1
+    for elements in CPlist:
+        print(str(elements['uniqueId'])[13:18])
+        url = "https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:13] + "LMS01?lmsGlobalId=00000000000e0005010f"
+        measurement = BackendRequestTemplate(atoken, url, s)
+        measurementJ = measurement.json()
+        content = measurementJ['message']
+        if content == None:
+            humidity = 255
+        else:
+            if content['idents'][14]['value'] == "Closed" or content['idents'][14]['value'] == "":
+                #print(content['idents'][14]['value'])
+                humidity = 999
             else:
-                if content['idents'][14]['value'] == "Closed" or content['idents'][14]['value'] == "":
-                    print(content['idents'][14]['value'])
-                    humidity = 999
-                else:
-                    print(content['idents'][14]['value'])
-                    humidity = content['idents'][14]['value']
+                #print(content['idents'][14]['value'])
+                humidity = content['idents'][14]['value']
+
+#searchID and fill in humidity
+        Xcp = searchXL(FeuchteTbl, str(elements['uniqueId']))[0]
+        if Xcp != "notFound":
+            FeuchteTbl.cell(row=Xcp, column=TodayCol).value = int(humidity)
+            FeedbackMessage = "Found in row: " + str(Xcp)
+        else:
+            FeedbackMessage = "Not found"
 
         print(humidity)
-        Tabellenblatt.cell(row=i, column=1).value = str(elements['uniqueId'])[:2]
-        Tabellenblatt.cell(row=i, column=2).value = str(elements['masterData']['chargingFacilities'][0]['power'])
-        Tabellenblatt.cell(row=i, column=3).value = str(elements['uniqueId'])
-        Tabellenblatt.cell(row=i, column=4).value = str(elements['masterData']['chargePointName'])
-        Tabellenblatt.cell(row=i, column=5).value = str(elements['firmwareVersion'])
-        Tabellenblatt.cell(row=i, column=6).value = str(elements['uniqueId'])[13:]
-        Tabellenblatt.cell(row=i, column=7).value = int(humidity)
+        FeedbackTbl.cell(row=i, column=1).value = str(elements['uniqueId'])[:2]
+        FeedbackTbl.cell(row=i, column=2).value = str(elements['masterData']['chargingFacilities'][0]['power'])
+        FeedbackTbl.cell(row=i, column=3).value = str(elements['uniqueId'])
+        FeedbackTbl.cell(row=i, column=4).value = str(elements['masterData']['chargePointName'])
+        FeedbackTbl.cell(row=i, column=5).value = str(elements['firmwareVersion'])
+        FeedbackTbl.cell(row=i, column=6).value = str(elements['uniqueId'])[13:]
+        FeedbackTbl.cell(row=i, column=7).value = int(humidity)
+        FeedbackTbl.cell(row=i, column=8).value = FeedbackMessage
         i = i+1
 
     wb.save('PythonZuExcel.xlsx')
