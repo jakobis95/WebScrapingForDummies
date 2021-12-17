@@ -71,9 +71,9 @@ def auswertungBackenddaten(obj, atoken, s):
                 humidity = content['idents'][14]['value']
 
 #searchID and fill in humidity
-        Xcp = searchXL(FeuchteTbl, str(elements['uniqueId']))[0]
+        Xcp = searchXL(FeuchteTbl, str(elements['uniqueId']))
         if Xcp != "notFound":
-            FeuchteTbl.cell(row=Xcp, column=TodayCol).value = int(humidity)
+            FeuchteTbl.cell(row=Xcp[0], column=TodayCol).value = int(humidity)
             FeedbackMessage = "Found in row: " + str(Xcp)
         else:
             FeedbackMessage = "Not found"
