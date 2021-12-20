@@ -2,7 +2,7 @@ import json
 from Runner import refreshT
 from openpyxl import Workbook,load_workbook
 import requests
-from NavigateInExcel import searchXL
+from NavigateInExcel import searchXL, conditional_formatting_with_rules
 from datetime import datetime
 import time
 def OnlyUsableDestinations(data):
@@ -38,11 +38,23 @@ def auswertungBackenddaten(obj, atoken, s):
     wb = load_workbook(filename='PythonZuExcel.xlsx')
     FeuchteTbl = wb.worksheets[0]
     FeedbackTbl = wb.worksheets[1]
+    LastCol = FeuchteTbl.max_column
+    i = 0
+    ok = False
+    WasStehtHierDrinne = FeuchteTbl.cell(row=1, column=LastCol - i).value
+    while ok != True:
+        if FeuchteTbl.cell(row=1, column=LastCol-i).value == None:
+            print("Letze Spalte hat keinen Inalt")
+            i = i+1
+        else:
+            print("Letze Spalte %d mit Inhalt", LastCol-i)
+            ok = True
+    TodayCol = LastCol + 2 - i
 
-    #obj = data.json()
 
-    searchTerm = "Feuchte " + datetime.today().strftime('%d.%m.%Y')
-    TodayCol = searchXL(FeuchteTbl, searchTerm)[1]
+
+    FeuchteTbl.cell(row=1, column=TodayCol).value = "Feuchte " + datetime.today().strftime('%d.%m.%Y %H:%M:%S')
+
 
     j = 1
     CPlist = []
@@ -71,9 +83,10 @@ def auswertungBackenddaten(obj, atoken, s):
                 humidity = content['idents'][14]['value']
 
 #searchID and fill in humidity
-        Xcp = searchXL(FeuchteTbl, str(elements['uniqueId']))
+        Xcp = searchXL(FeuchteTbl, str(elements['uniqueId']))[0]
         if Xcp != "notFound":
-            FeuchteTbl.cell(row=Xcp[0], column=TodayCol).value = int(humidity)
+            FeuchteTbl.cell(row=Xcp, column=TodayCol).value = int(humidity)
+            FeuchteTbl.cell(row=Xcp, column=TodayCol-1).value = FeuchteTbl.cell(row=Xcp, column=TodayCol).value - FeuchteTbl.cell(row=Xcp, column=TodayCol-2).value
             FeedbackMessage = "Found in row: " + str(Xcp)
         else:
             FeedbackMessage = "Not found"
@@ -89,6 +102,7 @@ def auswertungBackenddaten(obj, atoken, s):
         FeedbackTbl.cell(row=i, column=8).value = FeedbackMessage
         i = i+1
 
+    conditional_formatting_with_rules(FeuchteTbl, TodayCol)
     wb.save('PythonZuExcel.xlsx')
 
 if __name__ == "__main__":

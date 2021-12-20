@@ -1,6 +1,45 @@
 from openpyxl import Workbook
 import openpyxl
 from datetime import datetime
+from openpyxl.formatting.rule import ColorScale, FormatObject, CellIsRule
+from openpyxl.styles import Color, PatternFill, Font, Border
+from openpyxl.styles.differential import DifferentialStyle
+
+def conditional_formatting_with_rules(ws, todayCol):
+    #styles
+    greyFill = PatternFill(start_color='D9D9D9', end_color='D9D9D9', fill_type='solid')
+    greenFill = PatternFill(start_color='C6EFCE', end_color='C6EFCE', fill_type='solid')
+    redFill = PatternFill(start_color='FFC7CE', end_color='FFC7CE', fill_type='solid')
+    whiteFont = Font(color='FFFFFF')
+    greenFont = Font(color='006100')
+    redFont = Font(color='9C0006')
+
+
+    first = FormatObject(type='num', val=50)
+    last = FormatObject(type='num', val=65)
+    # colors match the format objects:
+    colors = [Color('00B0F0'), Color('FF0000')]
+    cs2 = ColorScale(cfvo=[first, last], color=colors)
+    # create a rule with the color scale
+    from openpyxl.formatting.rule import Rule
+    rule = Rule(type='colorScale', colorScale=cs2)
+    FirstCellIndex = ws.cell(row=2, column=todayCol).coordinate
+    LastCellIndex = ws.cell(row=ws.max_row, column=todayCol).coordinate
+    print(str(FirstCellIndex) + ':' + str(LastCellIndex))
+    area = str(FirstCellIndex) + ':' + str(LastCellIndex)
+    ws.conditional_formatting.add(area,CellIsRule(operator='greaterThan', formula=['101'], fill=greyFill, font=whiteFont))
+    ws.conditional_formatting.add(area, rule)
+
+
+    #Formatierung differenz zum Vortag
+    FirstCellIndex = ws.cell(row=2, column=todayCol-1).coordinate
+    LastCellIndex = ws.cell(row=ws.max_row, column=todayCol-1).coordinate
+    print(str(FirstCellIndex) + ':' + str(LastCellIndex))
+    divarea = str(FirstCellIndex) + ':' + str(LastCellIndex)
+    ws.conditional_formatting.add(divarea, CellIsRule(operator='between', formula=['1', '99'], fill=redFill, font=redFont))
+    ws.conditional_formatting.add(divarea, CellIsRule(operator='between', formula=['-1', '-99'], fill=greenFill, font=greenFont))
+    ws.conditional_formatting.add(divarea, CellIsRule(operator='greaterThan', formula=['100'], fill=greyFill, font=whiteFont))
+    ws.conditional_formatting.add(divarea, CellIsRule(operator='lessThan', formula=['-100'], fill=greyFill, font=whiteFont))
 
 def searchXL(ws, searchTerm, searchArea = 0, rowcol = "all"):
     Ycor = "notFound"
@@ -49,11 +88,9 @@ def searchXL(ws, searchTerm, searchArea = 0, rowcol = "all"):
 
 
 if __name__ == "__main__":
-    file = "NavigationSheet.xlsx"
-    # wb = openpyxl.Workbook(file)
+    file = "PythonZuExcel.xlsx"
     wb = openpyxl.load_workbook(filename=file)
     ws = wb.worksheets[0]
-    #searchTerm = "Fehlerhaft am " + datetime.today().strftime('%d.%m.%Y')
-    searchTerm = "ID"
-    Coordinates = searchXL(ws,searchTerm)
-    wb.save('NavigationSheet.xlsx')
+    TodayCol = ws.max_column
+    conditional_formatting_with_rules(ws, TodayCol)
+    wb.save('PythonZuExcel.xlsx')
