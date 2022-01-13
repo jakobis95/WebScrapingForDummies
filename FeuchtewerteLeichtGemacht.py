@@ -75,23 +75,26 @@ def auswertungBackenddaten(obj, atoken, s):
         if content == None:
             humidity = 255
         else:
-            if content['idents'][14]['value'] == "Closed" or content['idents'][14]['value'] == "":
-                #print(content['idents'][14]['value'])
+            if content['idents'][14]['value'] == "Closed" or content['idents'][14]['value'] == "" :
+                print(content['idents'][14]['value'])
                 humidity = 999
-            else:
+            elif content['idents'][14]['value'].isnumeric() == True:
                 #print(content['idents'][14]['value'])
                 humidity = content['idents'][14]['value']
+            else:
+                print("not numeric" + content['idents'][14]['value'])
+                humidity = 777
 
 #searchID and fill in humidity
         Xcp = searchXL(FeuchteTbl, str(elements['uniqueId']))[0]
         if Xcp != "notFound":
+            print(humidity)
             FeuchteTbl.cell(row=Xcp, column=TodayCol).value = int(humidity)
             FeuchteTbl.cell(row=Xcp, column=TodayCol-1).value = FeuchteTbl.cell(row=Xcp, column=TodayCol).value - FeuchteTbl.cell(row=Xcp, column=TodayCol-2).value
             FeedbackMessage = "Found in row: " + str(Xcp)
         else:
             FeedbackMessage = "Not found"
 
-        print(humidity)
         FeedbackTbl.cell(row=i, column=1).value = str(elements['uniqueId'])[:2]
         FeedbackTbl.cell(row=i, column=2).value = str(elements['masterData']['chargingFacilities'][0]['power'])
         FeedbackTbl.cell(row=i, column=3).value = str(elements['uniqueId'])
