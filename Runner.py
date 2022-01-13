@@ -68,9 +68,10 @@ def BackendRequestTemplate(atoken, url, s, i, typ):
         obj = json.load(c)
         print(Zustand[i] + ":::::::::")
         for elements in obj['content']:
-            if str(elements['uniqueId'])[13:15] == "CP" and int(elements['masterData']['chargingFacilities'][0]['power']) < 350 and str(elements['firmwareVersion']) != "":
-                print(str(elements['masterData']['chargingFacilities'][0]['power']) + ":" + str(elements['uniqueId']) + ":" + str(elements['masterData']['chargePointName']) + " : " + str(elements['firmwareVersion']))
-                CPList.append(elements)
+            if str(elements['uniqueId'])[13:15] == "CP"  and str(elements['firmwareVersion']) != "":
+                if str(elements["manufacturerModelId"]["name"]) == "DC CBX":
+                    print(str(elements['masterData']['chargingFacilities'][0]['power']) + ":" + str(elements['uniqueId']) + ":" + str(elements['masterData']['chargePointName']) + " : " + str(elements['firmwareVersion']))
+                    CPList.append(elements)
 
     return CPList
     # r = http.request('GET', 'https://api.chargepoint-management.com/status/connectionStatusList', headers=headers)
