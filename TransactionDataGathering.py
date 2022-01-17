@@ -6,7 +6,7 @@ from openpyxl import Workbook,load_workbook
 from Runner import refreshT
 
 
-def loadalldata(atoken, CPid, s, size=50):
+def TransactionDownload(Filename, atoken, CPid, s, size=50):
     #url = "https://api.chargepoint-management.com/status/connectionStatusList"
     url = "https://api.chargepoint-management.com/chargepoint/v1/transaction/list/filter?page=0&size=" + str(size) + "&sort=startDate,desc"
     headers = {
@@ -28,11 +28,11 @@ def loadalldata(atoken, CPid, s, size=50):
     p = s.post(url, headers=headers, verify=False, json=payload)
     print(p.json())
     print(p)
-    with open('TransactionData.txt', 'w') as f:
+    with open(Filename, 'w') as f:
         f.write(p.text)
     return p.json()
 
-def Create_Database_From_Json(Filename, XLSXname):
+def Create_XLSX_From_Json(Filename, XLSXname):
     wb = Workbook()
     ws = wb.worksheets[0]
     r = 1
@@ -70,7 +70,7 @@ def Get_cpoIds():
 def Update_CBXCP_list(CPsListname, atoken, s):
     AllStandorteURL = "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=5000&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC"
     AllCBXcp = BackendRequestTemplate(atoken, AllStandorteURL, s)
-    AllCBXcpJSON = AllCBXcp.json()  # alle CBX chargepoints in einer Tabelle mit verschiedenen anderen Metadaten
+    #AllCBXcpJSON = AllCBXcp.json()  # alle CBX chargepoints in einer Tabelle mit verschiedenen anderen Metadaten
     with open(CPsListname, 'w') as f:
         f.write(AllCBXcp.text)
 
@@ -82,7 +82,7 @@ def Update_CBX_Transaction_DB(CPsListname, atoken):
         i = i+1
         payload = CP['uniqueId']
         if i < 10:
-            TransactionDataCP = loadalldata(atoken, payload, s, size=100)
+            TransactionDataCP = TransactionDownload(atoken, payload, s, size=100)
             print(TransactionDataCP['totalElements'])
             # print("found %d transactions", TransactionDataCP[])
             #print(CP)
@@ -91,6 +91,7 @@ if __name__ == '__main__':
     Filename = 'TransactionData.json'
     XLSXname = 'TransactionData.xlsx'
     CPsListname = 'AllCPs.json'
+
     #Erstellt neue Session für das Backend
     s = requests.session()
     refreshT(s)
@@ -106,6 +107,7 @@ if __name__ == '__main__':
     payload = ""
     cpoIds = Get_cpoIds()
     #Downloads all Transaction data for the in Payload defined CPs
-    loadalldata(CPsListname, atoken, payload, s, size=2000)
-    Create_Database_From_Json(Filename, XLSXname)
-    Update_CBX_Transaction_DB(atoken)
+    TransactionDownload(Filename, CPsListname, atoken, payload, s, size=2000)
+    Create_XLSX_From_Json(Filename, XLSXname)
+    #creates a complete Transaction dataset
+    #Update_CBX_Transaction_DB(atoken)
