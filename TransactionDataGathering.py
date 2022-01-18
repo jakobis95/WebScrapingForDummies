@@ -26,8 +26,8 @@ def TransactionDownload(Filename, atoken, CPid, s, size=50):
     payload['chargePointIds'].append(CPid)
 
     p = s.post(url, headers=headers, verify=False, json=payload)
-    print(p.json())
-    print(p)
+    #print(p.json())
+    #print(p)
     with open(Filename, 'w') as f:
         f.write(p.text)
     return p.json()
@@ -74,40 +74,52 @@ def Update_CBXCP_list(CPsListname, atoken, s):
     with open(CPsListname, 'w') as f:
         f.write(AllCBXcp.text)
 
-def Update_CBX_Transaction_DB(CPsListname, atoken):
+def Update_CBX_Transaction_DB(Session, Filename,CPsListname, atoken):
     i=0
     with open(CPsListname, 'r') as f:
         obj = json.load(f)
     for CP in obj['content']:
         i = i+1
         payload = CP['uniqueId']
-        if i < 10:
-            TransactionDataCP = TransactionDownload(atoken, payload, s, size=100)
+        if i < 50:
+            TransactionDataCP = TransactionDownload(Filename, atoken, payload, Session, size=100)
             print(TransactionDataCP['totalElements'])
-            # print("found %d transactions", TransactionDataCP[])
-            #print(CP)
+            if TransactionDataCP['totalElements'] >= 100:
+                TransactionDataCP = TransactionDownload(Filename, atoken, payload, Session, size=TransactionDataCP['totalElements'])
+            JSONappend(Filename, TransactionDataCP)
+        else: break
     print(i)
+def JSONappend(Filename, JsonData):
+    i=0
+    # load Main Data File
+    with open(Filename, 'r') as f:
+        x = json.load(f)
+
+    for Transaction in JsonData["content"]:
+        x["content"].append(Transaction)
+
 if __name__ == '__main__':
     Filename = 'TransactionData.json'
     XLSXname = 'TransactionData.xlsx'
     CPsListname = 'AllCPs.json'
 
-    #Erstellt neue Session für das Backend
+    #Create Session for Backend
     s = requests.session()
     refreshT(s)
     with open('token2.txt', 'r') as jsonf:
-          data = json.load(jsonf)
-          print("vergleich")
-          print( data['refresh_token'])
+         data = json.load(jsonf)
+         print("vergleich")
+         print( data['refresh_token'])
     atoken = 'Bearer ' + data['access_token']
     #Downloads a list of all active Chargebox Charge Points
-    Update_CBXCP_list(CPsListname, atoken, s)
-    chargePointsIds = []
+    #Update_CBXCP_list(CPsListname, atoken, s)
+    #chargePointsIds = []
     #Payload hold the ID of the Chargepoint
     payload = ""
     cpoIds = Get_cpoIds()
     #Downloads all Transaction data for the in Payload defined CPs
-    TransactionDownload(Filename, CPsListname, atoken, payload, s, size=2000)
-    Create_XLSX_From_Json(Filename, XLSXname)
+    #TransactionDownload(Filename, atoken, payload, s, size=2000)
+    #Create_XLSX_From_Json(Filename, XLSXname)
     #creates a complete Transaction dataset
-    #Update_CBX_Transaction_DB(atoken)
+    Update_CBX_Transaction_DB(s,Filename, CPsListname, atoken)
+    #JSONappend(Filename)
