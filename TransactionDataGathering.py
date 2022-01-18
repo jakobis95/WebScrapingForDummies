@@ -28,8 +28,8 @@ def TransactionDownload(Filename, atoken, CPid, s, size=50):
     p = s.post(url, headers=headers, verify=False, json=payload)
     #print(p.json())
     #print(p)
-    with open(Filename, 'w') as f:
-        f.write(p.text)
+    # with open(Filename, 'w') as f:
+    #     f.write(p.text)
     return p.json()
 
 def Create_XLSX_From_Json(Filename, XLSXname):
@@ -95,11 +95,33 @@ def JSONappend(Filename, JsonData):
     with open(Filename, 'r') as f:
         x = json.load(f)
 
+    for Transaction in x["content"]:
+        i = i+1
+    print("Transactions befor in x %d", i)
+    i = 0
     for Transaction in JsonData["content"]:
         x["content"].append(Transaction)
 
+    for Transaction in x["content"]:
+        i = i+1
+    print("Transactions in x %d", i)
+
+    with open(Filename, 'w') as f:
+        json.dump(x, f)
+
+def create_empty_json(Session, atoken, Filename):
+
+    pjson = TransactionDownload(Filename, atoken, "CH9110000048_CPN02", Session, size=1)
+    print(pjson)
+    with open(Filename, 'w') as f:
+        json.dump(pjson, f)
+
+    with open(Filename, 'r') as f:
+        filedata = json.load(f)
+    print(filedata)
 if __name__ == '__main__':
-    Filename = 'TransactionData.json'
+    Filename = 'TransactionData.txt'
+    Filename2 = 'TransactionData2.txt'
     XLSXname = 'TransactionData.xlsx'
     CPsListname = 'AllCPs.json'
 
@@ -111,15 +133,20 @@ if __name__ == '__main__':
          print("vergleich")
          print( data['refresh_token'])
     atoken = 'Bearer ' + data['access_token']
-    #Downloads a list of all active Chargebox Charge Points
-    #Update_CBXCP_list(CPsListname, atoken, s)
-    #chargePointsIds = []
-    #Payload hold the ID of the Chargepoint
-    payload = ""
-    cpoIds = Get_cpoIds()
-    #Downloads all Transaction data for the in Payload defined CPs
-    #TransactionDownload(Filename, atoken, payload, s, size=2000)
-    #Create_XLSX_From_Json(Filename, XLSXname)
-    #creates a complete Transaction dataset
+    # #Downloads a list of all active Chargebox Charge Points
+    # #Update_CBXCP_list(CPsListname, atoken, s)
+    # #chargePointsIds = []
+    # #Payload hold the ID of the Chargepoint
+    # payload = ""
+    # cpoIds = Get_cpoIds()
+    # #Downloads all Transaction data for the in Payload defined CPs
+    # #TransactionDownload(Filename, atoken, payload, s, size=2000)
+    # #Create_XLSX_From_Json(Filename, XLSXname)
+    # #creates a complete Transaction dataset
     Update_CBX_Transaction_DB(s,Filename, CPsListname, atoken)
-    #JSONappend(Filename)
+    # JSONappend(Filename)
+    #create_empty_json(s,atoken,Filename2)
+    # for i in range(10):
+    #     with open(Filename2, 'r') as f:
+    #         filedata = json.load(f)
+    #     JSONappend(Filename, filedata)
