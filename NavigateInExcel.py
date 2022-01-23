@@ -42,21 +42,25 @@ def conditional_formatting_with_rules(ws, todayCol):
     ws.conditional_formatting.add(divarea, CellIsRule(operator='greaterThan', formula=['100'], fill=greyFill, font=whiteFont))
     ws.conditional_formatting.add(divarea, CellIsRule(operator='lessThan', formula=['-100'], fill=greyFill, font=whiteFont))
 
-def searchXL(ws, searchTerm, searchArea = 0, rowcol = "all"):
+def searchXL(ws, searchTerm, searchArea = 0, rowcol = "all"): # ws=Worksheet, searchTerm, searchArea= specifies the row or column that should be searched, rowcol= if you want to search a row or a column,
     Ycor = "notFound"
     Xcor = "notFound"
 
+    #search area parameters
     if searchArea != 0 or rowcol != "all":
+        #search only one row
         if rowcol == "row":
             minRow = searchArea
             maxRow = minRow
             minCol = 0
             maxCol = ws.max_column
+        #search only one col
         elif rowcol =="col":
             minCol = searchArea
             maxCol = minCol
             minRow = 0
             maxRow = ws.max_row
+    #search whole Worksheet
     else:
         minCol = 0
         minRow = 0
@@ -73,6 +77,7 @@ def searchXL(ws, searchTerm, searchArea = 0, rowcol = "all"):
     #             print("break")
     #             break
 
+    # Interrates over search area
     for col in ws.iter_cols(min_row=minRow, max_row=maxRow, min_col=minCol, max_col= maxCol):
         for cell in col:
             if cell.value == searchTerm:
