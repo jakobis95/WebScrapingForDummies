@@ -41,6 +41,7 @@ def cpstate(fehlerstandorte):
         StatusListe.append( Status + " : " + str(elements['masterData']['chargePointName']) + " : " +str(elements['uniqueId']))
     for content in StatusListe:
         print(content)
+    return StatusListe
 
 def BackendRequestTemplate(atoken, url, s, i, typ):
     http = urllib3.PoolManager()
@@ -129,5 +130,12 @@ if __name__ == '__main__':
     i = 0
     fehlerstandorte = BackendRequestTemplate(atoken,urllist[0],s,i, "fehler")
     i = 1
-    BackendRequestTemplate(atoken, urllist[1], s, i ,"offline")
-    cpstate(fehlerstandorte)
+    offlinestandorte = BackendRequestTemplate(atoken, urllist[1], s, i ,"offline")
+
+    f = open("offlinestandorte.text", 'w')
+    f.write(json.dumps(offlinestandorte))
+
+    fehlerstandorteStatus = cpstate(fehlerstandorte)
+
+    f = open("fehlerstandorteStatus.text", 'w')
+    f.write(json.dumps(fehlerstandorteStatus))
