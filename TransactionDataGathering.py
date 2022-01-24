@@ -1,9 +1,10 @@
 import requests
+import time
 from FeuchtewerteLeichtGemacht import BackendRequestTemplate
 import json
 import time
 from openpyxl import Workbook,load_workbook
-from Runner import refreshT
+from Runner import  BackendRequestTemplate as BackReqTem
 
 
 def TransactionDownload(Filename, atoken, CPid, s, size=50):
@@ -69,24 +70,49 @@ def Get_cpoIds():
     return cpoIds
 def Update_CBXCP_list(CPsListname, atoken, s):
     AllStandorteURL = "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=5000&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC"
-    AllCBXcp = BackendRequestTemplate(atoken, AllStandorteURL, s)
+    AllCBXcp = BackReqTem(atoken, AllStandorteURL, s, 2,)
     #AllCBXcpJSON = AllCBXcp.json()  # alle CBX chargepoints in einer Tabelle mit verschiedenen anderen Metadaten
     with open(CPsListname, 'w') as f:
-        f.write(AllCBXcp.text)
+        json.dump(AllCBXcp, f)
 
 def Update_CBX_Transaction_DB(Session, Filename,CPsListname, atoken):
     i=0
+    Gesamt = 0
+
+    with open(Filename, 'r') as f:
+        x = json.load(f)
+    LastID = x['content'][-1]['chargePointId']
+    print(LastID)
+
     with open(CPsListname, 'r') as f:
         obj = json.load(f)
-    for CP in obj['content']:
+    for CP in obj:
         i = i+1
+    objectCount = i
+    print("Es gibt ",objectCount ," CPs in der Liste")
+    i=0
+    for CP in obj:
+        if CP['uniqueId'] == LastID:
+            break
+        else:
+            i = i+1
+    lastIDIndex = i
+    firstNewIndex = lastIDIndex + 2
+    i
+    for index in range(firstNewIndex, objectCount):
+        i = i+1
+        CP = obj[index]
         payload = CP['uniqueId']
-        if i < 50:
+        if i < objectCount:
             TransactionDataCP = TransactionDownload(Filename, atoken, payload, Session, size=100)
-            print(TransactionDataCP['totalElements'])
+            print("Standort ",i,"/",objectCount,":",CP['uniqueId'], " hat ",TransactionDataCP['totalElements'], " Transactions")
+            Gesamt = Gesamt + TransactionDataCP['totalElements']
+            print(Gesamt)
             if TransactionDataCP['totalElements'] >= 100:
+                #time.sleep(5)
                 TransactionDataCP = TransactionDownload(Filename, atoken, payload, Session, size=TransactionDataCP['totalElements'])
             JSONappend(Filename, TransactionDataCP)
+            atoken = refreshT(s)
         else: break
     print(i)
 def JSONappend(Filename, JsonData):
@@ -95,14 +121,14 @@ def JSONappend(Filename, JsonData):
     with open(Filename, 'r') as f:
         x = json.load(f)
 
-    for Transaction in x["content"]:
+    for Transaction in x['content']:
         i = i+1
     print("Transactions befor in x %d", i)
     i = 0
-    for Transaction in JsonData["content"]:
-        x["content"].append(Transaction)
+    for Transaction in JsonData['content']:
+        x['content'].append(Transaction)
 
-    for Transaction in x["content"]:
+    for Transaction in x['content']:
         i = i+1
     print("Transactions in x %d", i)
 
@@ -111,7 +137,7 @@ def JSONappend(Filename, JsonData):
 
 def create_empty_json(Session, atoken, Filename):
 
-    pjson = TransactionDownload(Filename, atoken, "CH9110000048_CPN02", Session, size=1)
+    pjson = TransactionDownload(Filename, atoken, "US9110000362_CPN01", Session, size=1000)
     print(pjson)
     with open(Filename, 'w') as f:
         json.dump(pjson, f)
@@ -119,34 +145,75 @@ def create_empty_json(Session, atoken, Filename):
     with open(Filename, 'r') as f:
         filedata = json.load(f)
     print(filedata)
+
+def refreshT(s): # Hier wird der Token refreshed
+    #die verwendete Json datei wird aus dem Browser kopiert
+    with open('refreshtoken.txt', 'r') as jsonf:
+        data = json.load(jsonf)
+        #print(data['refresh_token'])
+
+
+    url = 'https://login.chargepoint-management.com/auth/realms/PAG/protocol/openid-connect/token'
+    headers = {
+        'authority' : 'api.chargepoint-management.com',
+        'accept' : '*/*',
+        'accept-encoding' : 'gzip, deflate, br',
+        'accept-language' : 'de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7',
+        'Origin' : 'https://www.chargepoint-management.com',
+        'Referer':'https://www.chargepoint-management.com/',
+        'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36',
+        'Cookie': 'AUTH_SESSION_ID=a4f12be7-2104-43c3-85a5-b62176eb82e3.e3b7f9c6-acc3-4abe-7b3a-4903; AUTH_SESSION_ID_LEGACY=a4f12be7-2104-43c3-85a5-b62176eb82e3.e3b7f9c6-acc3-4abe-7b3a-4903; KEYCLOAK_SESSION=PAG/12ca747b-237d-433c-afcc-9757ffe96d14/a4f12be7-2104-43c3-85a5-b62176eb82e3; KEYCLOAK_SESSION_LEGACY=PAG/12ca747b-237d-433c-afcc-9757ffe96d14/a4f12be7-2104-43c3-85a5-b62176eb82e3; KEYCLOAK_IDENTITY=eyJhbGciOiJIUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJiODJmYzRkZC1iOGI5LTQyODQtYjZlNy0wMTg3NTRlYWFiMzAifQ.eyJleHAiOjE2Mzg4NDgyNTEsImlhdCI6MTYzODgxMjI1MSwianRpIjoiZGFiYzMyYmQtYjJlOS00Njg2LWJkOTQtMGE3YWVmNDY0YmIyIiwiaXNzIjoiaHR0cHM6Ly9sb2dpbi5jaGFyZ2Vwb2ludC1tYW5hZ2VtZW50LmNvbS9hdXRoL3JlYWxtcy9QQUciLCJzdWIiOiIxMmNhNzQ3Yi0yMzdkLTQzM2MtYWZjYy05NzU3ZmZlOTZkMTQiLCJ0eXAiOiJTZXJpYWxpemVkLUlEIiwic2Vzc2lvbl9zdGF0ZSI6ImE0ZjEyYmU3LTIxMDQtNDNjMy04NWE1LWI2MjE3NmViODJlMyIsInN0YXRlX2NoZWNrZXIiOiJ4bWNfcHdCMVFobThOczNQSkFrNW91cDROeFlTUmN2UUhkWnh4LVFzWFFRIn0.fcif5iM_sOKPwJEoIQ3lYFsKvP0p_i8MASjq_q09FEA; KEYCLOAK_IDENTITY_LEGACY=eyJhbGciOiJIUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJiODJmYzRkZC1iOGI5LTQyODQtYjZlNy0wMTg3NTRlYWFiMzAifQ.eyJleHAiOjE2Mzg4NDgyNTEsImlhdCI6MTYzODgxMjI1MSwianRpIjoiZGFiYzMyYmQtYjJlOS00Njg2LWJkOTQtMGE3YWVmNDY0YmIyIiwiaXNzIjoiaHR0cHM6Ly9sb2dpbi5jaGFyZ2Vwb2ludC1tYW5hZ2VtZW50LmNvbS9hdXRoL3JlYWxtcy9QQUciLCJzdWIiOiIxMmNhNzQ3Yi0yMzdkLTQzM2MtYWZjYy05NzU3ZmZlOTZkMTQiLCJ0eXAiOiJTZXJpYWxpemVkLUlEIiwic2Vzc2lvbl9zdGF0ZSI6ImE0ZjEyYmU3LTIxMDQtNDNjMy04NWE1LWI2MjE3NmViODJlMyIsInN0YXRlX2NoZWNrZXIiOiJ4bWNfcHdCMVFobThOczNQSkFrNW91cDROeFlTUmN2UUhkWnh4LVFzWFFRIn0.fcif5iM_sOKPwJEoIQ3lYFsKvP0p_i8MASjq_q09FEA'
+        }
+    payload ={
+        'grant_type':'refresh_token',
+        'refresh_token' : data["refresh_token"],
+        'client_id' : 'cpoc-frontend'
+        }
+
+
+    p = s.post(url, headers=headers, verify=False, data = payload )
+    #print(p)
+
+    with open('refreshtoken.txt', 'w') as f:
+        f.write(p.text)
+
+    with open('refreshtoken.txt', 'r') as jsonf:
+        data = json.load(jsonf)
+        #print("vergleich")
+        #print( data['refresh_token'])
+
+    return 'Bearer ' + data['access_token']
+
+    # with open('token2.txt', 'r') as jsonf:
+    #     data = json.load(jsonf)
+    #     print("vergleich")
+    #     print( data['refresh_token'])
+    #     print('Bearer ' + data['access_token'])
+
 if __name__ == '__main__':
     Filename = 'TransactionData.txt'
     Filename2 = 'TransactionData2.txt'
     XLSXname = 'TransactionData.xlsx'
-    CPsListname = 'AllCPs.json'
+    CPsListname = 'AllCPs.text'
 
     #Create Session for Backend
     s = requests.session()
-    refreshT(s)
-    with open('token2.txt', 'r') as jsonf:
-         data = json.load(jsonf)
-         print("vergleich")
-         print( data['refresh_token'])
-    atoken = 'Bearer ' + data['access_token']
-    # #Downloads a list of all active Chargebox Charge Points
-    # #Update_CBXCP_list(CPsListname, atoken, s)
-    # #chargePointsIds = []
-    # #Payload hold the ID of the Chargepoint
-    # payload = ""
-    # cpoIds = Get_cpoIds()
-    # #Downloads all Transaction data for the in Payload defined CPs
-    # #TransactionDownload(Filename, atoken, payload, s, size=2000)
-    # #Create_XLSX_From_Json(Filename, XLSXname)
-    # #creates a complete Transaction dataset
-    Update_CBX_Transaction_DB(s,Filename, CPsListname, atoken)
-    # JSONappend(Filename)
+    atoken = refreshT(s)
+    #Downloads a list of all active Chargebox Charge Points
+    #Update_CBXCP_list(CPsListname, atoken, s)
+    #chargePointsIds = []
+    #Payload hold the ID of the Chargepoin
+    #Downloads all Transaction data for the in Payload defined CPs
+    #print(TransactionDownload(Filename, atoken, 'DE9110000079_CPN02', s, size=2000))
+
+    #Create_XLSX_From_Json(Filename, XLSXname)
+
+
+    #creates a complete Transaction dataset
+    Update_CBX_Transaction_DB(s,Filename2, CPsListname, atoken)
+    #JSONappend(Filename)
+    f = open(CPsListname)
+    CPList = json.load(f)
+    for standort in CPList:
+        print(standort["manufacturerModelId"]["name"])
     #create_empty_json(s,atoken,Filename2)
-    # for i in range(10):
-    #     with open(Filename2, 'r') as f:
-    #         filedata = json.load(f)
-    #     JSONappend(Filename, filedata)
