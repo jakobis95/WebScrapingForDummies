@@ -43,7 +43,7 @@ def cpstate(fehlerstandorte):
         print(content)
     return StatusListe
 
-def BackendRequestTemplate(atoken, url, s, i, typ):
+def BackendRequestTemplate(atoken, url, s, i):
     http = urllib3.PoolManager()
     CPList = []
 
