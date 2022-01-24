@@ -1,4 +1,5 @@
 import json
+import os
 from Runner import refreshT
 from openpyxl import Workbook,load_workbook
 import requests
@@ -21,6 +22,7 @@ def findTodayCol(worksheet):
             i = i + 1
 
     LastCol = LastCol - i
+    print("XX Letze Spalte", LastCol, " mit Inhalt", WasStehtHierDrinne)
     return LastCol
 
 def OnlyUsableDestinations(data):
@@ -57,20 +59,8 @@ def auswertungBackenddaten(obj, atoken, s):
     FeuchteTbl = wb.worksheets[0]
     FeedbackTbl = wb.worksheets[1]
 
-    # soll die letzte beschriebene Spalte finden
-    LastCol = FeuchteTbl.max_column
-    print("LastCol ", LastCol)
-    i = 0
-    ok = False
-    WasStehtHierDrinne = FeuchteTbl.cell(row=1, column=LastCol - i).value
-    while ok != True:
-        if FeuchteTbl.cell(row=1, column=LastCol-i).value == None:
-            print("Letze Spalte hat keinen Inalt")
-            i = i+1
-        else:
-            print("Letze Spalte %d mit Inhalt", LastCol-i)
-            ok = True
-    TodayCol = LastCol + 2 - i
+    LastCol = findTodayCol(FeuchteTbl)
+    TodayCol = LastCol + 2
 
 
 
@@ -89,6 +79,7 @@ def auswertungBackenddaten(obj, atoken, s):
     i = 1
     for elements in CPlist:
         print(str(elements['uniqueId'])[13:18])
+        print(str(elements['uniqueId']))
         url = "https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:13] + "LMS01?lmsGlobalId=00000000000e0005010f"
         measurement = BackendRequestTemplate(atoken, url, s)
         measurementJ = measurement.json()
@@ -109,9 +100,13 @@ def auswertungBackenddaten(obj, atoken, s):
 #searchID and fill in humidity
         Xcp = searchXL(FeuchteTbl, str(elements['uniqueId']))[0]
         if Xcp != "notFound":
+            #kleine Sicherheitsfunktion falls Neuestandorte hinzugefügt wurden ohne für diesen Tag den entsprechenden Wert hinzuzufügen
+            if FeuchteTbl.cell(row=Xcp, column=TodayCol).value == None:
+                FeuchteTbl.cell(row=Xcp, column=TodayCol).value = "0"
+
             print("feuchte", int(humidity))
-            print("Tabellenwert Heute:", FeuchteTbl.cell(row=Xcp, column=TodayCol).value," - ", FeuchteTbl.cell(row=Xcp, column=TodayCol-2).value)
             FeuchteTbl.cell(row=Xcp, column=TodayCol).value = int(humidity)
+            print("Tabellenwert Heute:", FeuchteTbl.cell(row=Xcp, column=TodayCol).value," - ", FeuchteTbl.cell(row=Xcp, column=TodayCol-2).value)
             FeuchteTbl.cell(row=Xcp, column=TodayCol-1).value = FeuchteTbl.cell(row=Xcp, column=TodayCol).value - FeuchteTbl.cell(row=Xcp, column=TodayCol-2).value
             FeedbackMessage = "Found in row: " + str(Xcp)
         else:
@@ -135,18 +130,19 @@ if __name__ == "__main__":
     #url = "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=1000&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=ACTIVE&status=FAULTED&status=INACTIVE"
     url = "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=1000&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC"
     s = requests.session()
-    # refreshT(s)
-    # # # with open('token2.txt', 'r') as jsonf:
-    # #     data = json.load(jsonf)
-    #     print("vergleich")
-    #     print(data['refresh_token'])
-    # atoken = 'Bearer ' + data['access_token']
-    # data = BackendRequestTemplate(atoken, url, s)
-    # data = OnlyUsableDestinations(data)
-    # auswertungBackenddaten(data, atoken, s)
+    refreshT(s)
+    with open('token2.txt', 'r') as jsonf:
+        data = json.load(jsonf)
+        print("vergleich")
+        print(data['refresh_token'])
+    atoken = 'Bearer ' + data['access_token']
+    data = BackendRequestTemplate(atoken, url, s)
+    data = OnlyUsableDestinations(data)
+    auswertungBackenddaten(data, atoken, s)
 
-    wb = load_workbook(filename='PythonZuExcel.xlsx')
-    FeuchteTbl = wb.worksheets[0]
-    LastCol = findTodayCol(FeuchteTbl)
-    for i in range(1,100):
-        print(FeuchteTbl.cell(row=i, column=LastCol).value)
+    os.startfile('PythonZuExcel.xlsx')
+    # wb = load_workbook(filename='PythonZuExcel.xlsx')
+    # FeuchteTbl = wb.worksheets[0]
+    # LastCol = findTodayCol(FeuchteTbl)
+    # for i in range(1,100):
+    #     print(FeuchteTbl.cell(row=i, column=LastCol).value)
