@@ -27,21 +27,35 @@ def cpstate(fehlerstandorte):
         s.get(url, headers=headers, verify=False)
         #time.sleep(1)
 
+#fehlerstandorte durchgehen
+    f = open("JSONsample.txt")
+    JSONlist = json.load(f)
+
     for elements in fehlerstandorte:
         url = ("https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:12] + "_LMS01?lmsGlobalId=de911000016700030" +str(elements['uniqueId'])[17] + "0a")
         print(url)
         CPdata = s.get(url, headers=headers, verify=False)
         time.sleep(2)
         CPdataJ = CPdata.json()
+
         if CPdataJ['message'] == None:
             Status = "Error"
         else:
             Status = str(CPdataJ['message']['idents'][8]['value'])
-        print(str(elements['masterData']['chargePointName']) + " : " +str(elements['uniqueId']) + " : " + Status)
+        #print(str(elements['masterData']['chargePointName']) + " : " +str(elements['uniqueId']) + " : " + Status)
         StatusListe.append( Status + " : " + str(elements['masterData']['chargePointName']) + " : " +str(elements['uniqueId']))
+
+        element = {"chargePointName": "", "uniqueId": "", "Status": ""}
+        element['chargePointName'] = elements['masterData']['chargePointName']
+        element['Status'] = Status
+        element['uniqueId'] = elements['uniqueId']
+        print(element)
+        JSONlist.append(element)
+
+    print(JSONlist)
     for content in StatusListe:
         print(content)
-    return StatusListe
+    return JSONlist
 
 def BackendRequestTemplate(atoken, url, s, i):
     http = urllib3.PoolManager()
@@ -128,9 +142,9 @@ if __name__ == '__main__':
         print( data['refresh_token'])
     atoken = 'Bearer ' + data['access_token']
     i = 0
-    fehlerstandorte = BackendRequestTemplate(atoken,urllist[0],s,i, "fehler")
+    fehlerstandorte = BackendRequestTemplate(atoken,urllist[0],s,i) #typ = fehler
     i = 1
-    offlinestandorte = BackendRequestTemplate(atoken, urllist[1], s, i ,"offline")
+    offlinestandorte = BackendRequestTemplate(atoken, urllist[1], s, i ) #typ = offline
 
     f = open("offlinestandorte.text", 'w')
     f.write(json.dumps(offlinestandorte))
