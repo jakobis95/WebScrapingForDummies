@@ -69,6 +69,7 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
             if foundRow != "notFound":
                 StatusWB.cell(row=foundRow, column=TodayColumn).value = "j"
                 StatusWB.cell(row=foundRow, column=cpColumn[cp]).value = "x"
+                StatusWB.cell(row=foundRow, column=9).value = item['ErrorMessage']
                 TodayFehlerWB.cell(row=todayCbxCounter, column=2).value = 'Gefunden'
             else:
                 TodayFehlerWB.cell(row=todayCbxCounter, column=2).value = 'nicht Gefunden'

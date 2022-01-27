@@ -25,7 +25,11 @@ def cpstate(fehlerstandorte):
     for elements in fehlerstandorte:
         url = ("https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:12] + "_LMS01/request?lmsGlobalId=de911000016700030"+ str(elements['uniqueId'])[17] +"0a&force=true")
         s.get(url, headers=headers, verify=False)
-        #time.sleep(1)
+
+        time.sleep(1)
+        #update error message board
+        url = ("https://api.chargepoint-management.com/maintenance/v1/dtcs/" + str(elements['uniqueId'])[:12] + "_LMS01/request?lmsGlobalId=00000000000100050"+ str(elements['uniqueId'])[17] +"0f&dtcStatus=31&force=true")
+        s.get(url, headers=headers, verify=False)
 
 #fehlerstandorte durchgehen
     f = open("JSONsample.txt")
@@ -35,20 +39,35 @@ def cpstate(fehlerstandorte):
         url = ("https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:12] + "_LMS01?lmsGlobalId=de911000016700030" +str(elements['uniqueId'])[17] + "0a")
         print(url)
         CPdata = s.get(url, headers=headers, verify=False)
-        time.sleep(2)
+        time.sleep(1)
         CPdataJ = CPdata.json()
+
+#get error message from Chargepoint
+        url = ("https://api.chargepoint-management.com/maintenance/v1/dtcs/" + str(elements['uniqueId'])[:12] + "_LMS01?lmsGlobalId=00000000000100050" +str(elements['uniqueId'])[17] + "0f")
+        print(url)
+        errorData = s.get(url, headers=headers, verify=False)
+        time.sleep(1)
+        errorJ = errorData.json()
+        errorStr = "X"
+        print(errorJ)
+        if errorJ['message'] == None:
+            errorStr = "No error Data"
+        else:
+            for error in errorJ['message']['dtcs']:
+                errorStr = "" + errorStr + "; " + error['dtcText'] + ""
 
         if CPdataJ['message'] == None:
             Status = "Error"
         else:
             Status = str(CPdataJ['message']['idents'][8]['value'])
         #print(str(elements['masterData']['chargePointName']) + " : " +str(elements['uniqueId']) + " : " + Status)
-        StatusListe.append( Status + " : " + str(elements['masterData']['chargePointName']) + " : " +str(elements['uniqueId']))
+        StatusListe.append( Status + " : " + str(elements['masterData']['chargePointName']) + " : " +str(elements['uniqueId'] +" : " + str(errorJ)))
 
-        element = {"chargePointName": "", "uniqueId": "", "Status": ""}
+        element = {"chargePointName": "", "uniqueId": "", "Status": "", "ErrorMessage": ""}
         element['chargePointName'] = elements['masterData']['chargePointName']
         element['Status'] = Status
         element['uniqueId'] = elements['uniqueId']
+        element['ErrorMessage'] = errorStr
         print(element)
         JSONlist.append(element)
 
@@ -128,7 +147,44 @@ def refreshT(s): # Hier wird der Token refreshed
     #     print("vergleich")
     #     print( data['refresh_token'])
     #     print('Bearer ' + data['access_token'])
+def get_error_msg(fehlerstandorte):
+    Status = ""
+    StatusListe = []
+    headers = {
+        'authority': 'api.chargepoint-management.com',
+        'accept': 'application/json, text/plain, */*',
+        'accept-encoding': 'gzip, deflate, br',
+        'accept-language': 'de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7',
+        'Origin': 'https://www.chargepoint-management.com',
+        'Referer': 'https://www.chargepoint-management.com/',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36',
+        'Authorization': atoken
+    }
+    for elements in fehlerstandorte:
+        # update error message board
+        url = ("https://api.chargepoint-management.com/maintenance/v1/dtcs/" + str(elements['uniqueId'])[
+                                                                               :12] + "_LMS01/request?lmsGlobalId=00000000000100050" +
+               str(elements['uniqueId'])[17] + "0f&dtcStatus=31&force=true")
+        s.get(url, headers=headers, verify=False)
 
+    for elements in fehlerstandorte:
+        # get error message from Chargepoint
+        url = ("https://api.chargepoint-management.com/maintenance/v1/dtcs/" + str(elements['uniqueId'])[
+                                                                               :12] + "_LMS01?lmsGlobalId=00000000000100050" +
+               str(elements['uniqueId'])[17] + "0f")
+        print(url)
+        errorData = s.get(url, headers=headers, verify=False)
+        time.sleep(1)
+        errorJ = errorData.json()
+        errorStr = "X"
+        #print(errorJ)
+        if errorJ['message'] == None:
+            errorStr = "No error Data"
+        else:
+            for error in errorJ['message']['dtcs']:
+                errorStr = "" +errorStr +"; " + error['dtcText']+ ""
+            print(errorStr)
+    return errorJ
 if __name__ == '__main__':
     i = 0
     urllist = ["https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=FAULTED",
@@ -144,6 +200,8 @@ if __name__ == '__main__':
     i = 0
     fehlerstandorte = BackendRequestTemplate(atoken,urllist[0],s,i) #typ = fehler
     i = 1
+
+    #get_error_msg(fehlerstandorte)
     offlinestandorte = BackendRequestTemplate(atoken, urllist[1], s, i ) #typ = offline
 
     f = open("offlinestandorte.text", 'w')
