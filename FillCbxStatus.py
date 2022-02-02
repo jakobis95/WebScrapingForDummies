@@ -12,9 +12,11 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
     todayCbxCounter = 1
     StatusWB = wb["cbxStatusListe"]
     TodayFehlerWB = wb["overviewToday"]
+    NIBfehlerWB = wb["NIBfehler"]
+    NIBofflineWB = wb["NIBoffline"]
     LastRow = StatusWB.max_row
     TodayColumnString = "Fehlerhaft am " + datetime.today().strftime('%d.%m.%Y')
-    #TodayColumnString = "Fehlerhaft am 25.01.2022"
+    #TodayColumnString = "Fehlerhaft am 28.01.2022"
     #finds Column with the date of today
     TodayCell = searchXL(StatusWB, TodayColumnString)
     TodayColumn = TodayCell[1]
@@ -52,8 +54,7 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
 
         # Fill in all destinations that currently have a failure
         for item in fehlerCBX:
-            #print(fehlerCBX)
-            print(item)
+
             if item['uniqueId'][17] == "1":
                 cp = 0
                 searchTerm = item['uniqueId']
@@ -69,7 +70,8 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
             if foundRow != "notFound":
                 StatusWB.cell(row=foundRow, column=TodayColumn).value = "j"
                 StatusWB.cell(row=foundRow, column=cpColumn[cp]).value = "x"
-                StatusWB.cell(row=foundRow, column=9).value = item['ErrorMessage']
+                if StatusWB.cell(row=foundRow, column=TodayColumn-1).value != "j":
+                    StatusWB.cell(row=foundRow, column=9).value = item['ErrorMessage']
                 TodayFehlerWB.cell(row=todayCbxCounter, column=2).value = 'Gefunden'
             else:
                 TodayFehlerWB.cell(row=todayCbxCounter, column=2).value = 'nicht Gefunden'
@@ -89,12 +91,13 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
             if Value == None :
                 print(todayCbxCounter)
                 StatusWB.cell(row=todayCbxCounter, column=TodayColumn).value = "n"
-            if Value != ValueM1:
+
+            if StatusWB.cell(row=todayCbxCounter, column=TodayColumn).value != ValueM1:
                 StatusWB.cell(row=todayCbxCounter, column=3).fill = my_fill
-            else: StatusWB.cell(row=todayCbxCounter, column=3).fill = no_fill
+            else:
+                StatusWB.cell(row=todayCbxCounter, column=3).fill = no_fill
             todayCbxCounter = todayCbxCounter + 1
 
-    # TODO: Alle nicht befüllten Felder mit "n" makieren
     else:
         print("Es konnte kein Spalte mit dem heutigen Datum gefunden werden. Prüfen Sie die Excel-datei.")
     # print(searchXL(StatusWB, "Hello was geht"))
@@ -104,15 +107,9 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
 
 if __name__ == "__main__":
     xlsxPfad = r"C:\Users\FO4A5OY\OneDrive - Dr. Ing. h.c. F. Porsche AG\LE_Failure_Analysis\CBX_Fehlerliste_AutoPyTesting.xlsx"
-    # f = open("fehler.json")
-    # fehlerCBX = json.load(f)
-    #
-    # f = open("offline.json")
-    # offlineCBX = json.load(f)
 
     #WriteStatusToXL(offlineCBX, fehlerCBX, xlsxPfad)
     #WriteStatusToXL( xlsxPfad, offlineCBX, offlineCBX)
-# Todo fehlerstandortedatei als Dict oder Liste Speichern
     f = open("fehlerstandorteStatus.text", 'r')
     fehlerCBX = json.load(f)
     for element in fehlerCBX:
@@ -128,20 +125,3 @@ if __name__ == "__main__":
     xlsxPfad = r"C:\Users\FO4A5OY\OneDrive - Dr. Ing. h.c. F. Porsche AG\LE_Failure_Analysis\CBX_Fehlerliste_AutoPyTesting.xlsx"
     #os.system('start  "excel" "C:\\Users\\FO4A5OY\\OneDrive - Dr. Ing. h.c. F. Porsche AG\\LE_Failure_Analysis\\CBX_Fehlerliste_AutoPyTesting.xlsx"')
     os.startfile(xlsxPfad)
-    # Data to be written
-    # with open("JSONsample.txt") as fp:
-    #     JSONlist = json.load(fp)
-    #f = open("JSONsample.txt")
-    #JSONlist = json.load(f)
-    # element = {"chargePointName": "", "uniqueId": "", "Status": ""}
-    #
-    # for j in range(6):
-    #     element = {"chargePointName": "", "uniqueId": "", "Status": ""}
-    #     element['chargePointName'] = j * 3
-    #     element['uniqueId'] = j +33
-    #     print(element)
-    #     JSONlist.append(element)
-    #
-    # for item in JSONlist:
-    #     print(item['uniqueId'])
-    # print(JSONlist)

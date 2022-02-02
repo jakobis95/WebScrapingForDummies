@@ -55,11 +55,12 @@ def auswertungBackenddaten(obj, atoken, s):
     humidity = "999"
     print("Auswertung")
     i = 1
-    wb = load_workbook(filename='PythonZuExcel.xlsx')
+    wb = load_workbook(filename='PythonZuExcelWithPressure.xlsx')
     FeuchteTbl = wb.worksheets[0]
     FeedbackTbl = wb.worksheets[1]
 
     LastCol = findTodayCol(FeuchteTbl)
+    FirmwareCol = searchXL(FeuchteTbl,"Firmware")[1]
     TodayCol = LastCol + 2
 
 
@@ -106,6 +107,7 @@ def auswertungBackenddaten(obj, atoken, s):
 
             print("feuchte", int(humidity))
             FeuchteTbl.cell(row=Xcp, column=TodayCol).value = int(humidity)
+            FeuchteTbl.cell(row=Xcp, column=FirmwareCol).value = str(elements['firmwareVersion'])
             print("Tabellenwert Heute:", FeuchteTbl.cell(row=Xcp, column=TodayCol).value," - ", FeuchteTbl.cell(row=Xcp, column=TodayCol-2).value)
             FeuchteTbl.cell(row=Xcp, column=TodayCol-1).value = FeuchteTbl.cell(row=Xcp, column=TodayCol).value - FeuchteTbl.cell(row=Xcp, column=TodayCol-2).value
             FeedbackMessage = "Found in row: " + str(Xcp)
@@ -123,7 +125,7 @@ def auswertungBackenddaten(obj, atoken, s):
         i = i+1
 
     conditional_formatting_with_rules(FeuchteTbl, TodayCol)
-    wb.save('PythonZuExcel.xlsx')
+    wb.save('PythonZuExcelWithPressure.xlsx')
 
 if __name__ == "__main__":
     i = 0
@@ -138,9 +140,12 @@ if __name__ == "__main__":
     atoken = 'Bearer ' + data['access_token']
     data = BackendRequestTemplate(atoken, url, s)
     data = OnlyUsableDestinations(data)
+    print(data)
+    f = open("UsableDestinationsDaily.txt", 'w')
+    f.write(json.dumps(data))
     auswertungBackenddaten(data, atoken, s)
 
-    os.startfile('PythonZuExcel.xlsx')
+    os.startfile('PythonZuExcelWithPressure.xlsx')
     # wb = load_workbook(filename='PythonZuExcel.xlsx')
     # FeuchteTbl = wb.worksheets[0]
     # LastCol = findTodayCol(FeuchteTbl)

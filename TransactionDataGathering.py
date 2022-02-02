@@ -72,7 +72,7 @@ def Update_CBXCP_list(CPsListname, atoken, s):
     AllStandorteURL = "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=5000&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC"
     AllCBXcp = BackReqTem(atoken, AllStandorteURL, s, 2,)
     #AllCBXcpJSON = AllCBXcp.json()  # alle CBX chargepoints in einer Tabelle mit verschiedenen anderen Metadaten
-    with open(CPsListname, 'w') as f:
+    with open(CPsListname.txt, 'w') as f:
         json.dump(AllCBXcp, f)
 
 def Update_CBX_Transaction_DB(Session, Filename,CPsListname, atoken):
