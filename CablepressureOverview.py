@@ -86,19 +86,25 @@ def CpPressureToXl(data, atoken, s):
         FeedbackTbl.cell(row=j, column=6).value = str(element['uniqueId'])[13:]
         FeedbackTbl.cell(row=j, column=7).value = FeedbackMessage
         j = j + 1
+        if j % 10 == 0:
+            atoken = GetAToken(s)
     wb.save('PythonZuExcelWithPressure.xlsx')
-if __name__ == "__main__":
-    i = 0
-    #url = "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=1000&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=ACTIVE&status=FAULTED&status=INACTIVE"
+
+def GetAToken(s):
     url = "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=1000&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC"
-    s = requests.session()
     refreshT(s)
     with open('token2.txt', 'r') as jsonf:
         data = json.load(jsonf)
         print("vergleich")
         print(data['refresh_token'])
     atoken = 'Bearer ' + data['access_token']
+    return atoken
 
+if __name__ == "__main__":
+    i = 0
+    s = requests.session()
+    #url = "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=1000&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=ACTIVE&status=FAULTED&status=INACTIVE"
+    atoken = GetAToken(s)
     #AllStandorteURL = "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=5000&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC"
     #AllCBXcp = BackReqTem(atoken, AllStandorteURL, s, 2, )
     #with open("UsableDestinationsDaily.txt", 'w') as f:
@@ -112,11 +118,7 @@ if __name__ == "__main__":
     #for element in CPplaces:
         #Update(element, atoken, s)
     print("update fertig")
-    with open('token2.txt', 'r') as jsonf:
-        data = json.load(jsonf)
-        print("vergleich")
-        print(data['refresh_token'])
-    atoken = 'Bearer ' + data['access_token']
+    atoken = GetAToken(s)
 
     CpPressureToXl(CPplaces, atoken, s)
 

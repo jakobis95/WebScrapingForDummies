@@ -2,6 +2,7 @@
 import requests
 import json
 import time
+
 #from SessionPPN_call import refreshT
 
 
@@ -120,7 +121,8 @@ def cpstate(fehlerstandorte):
         element['uniqueId'] = elements['uniqueId']
         element['ErrorMessage'] = errorStr
         print(element)
-        JSONlist.append(element)
+        if Status != "State B - car connected":
+            JSONlist.append(element)
     print(JSONlist)
     for content in StatusListe:
         print(content)
@@ -241,7 +243,7 @@ if __name__ == '__main__':
             "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=INACTIVE"
             ]
     s = requests.session()
-    refreshT(s)
+    refreshT(s) 
     with open('token2.txt', 'r') as jsonf:
         data = json.load(jsonf)
         print("vergleich")
@@ -251,11 +253,11 @@ if __name__ == '__main__':
     fehlerstandorte = BackendRequestTemplate(atoken,urllist[0],s,i) #typ = fehler
     i = 1
 
-    #get_error_msg(fehlerstandorte)
-    #offlinestandorte = BackendRequestTemplate(atoken, urllist[1], s, i ) #typ = offline
+    get_error_msg(fehlerstandorte)
+    offlinestandorte = BackendRequestTemplate(atoken, urllist[1], s, i ) #typ = offline
 
-    #f = open("offlinestandorte.text", 'w')
-    #f.write(json.dumps(offlinestandorte))
+    f = open("offlinestandorte.text", 'w')
+    f.write(json.dumps(offlinestandorte))
 
     fehlerstandorteStatus = cpstate(fehlerstandorte)
 

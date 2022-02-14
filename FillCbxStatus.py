@@ -80,11 +80,20 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
             TodayFehlerWB.cell(row=todayCbxCounter, column=3).value = item['chargePointName']
             TodayFehlerWB.cell(row=todayCbxCounter, column=4).value = 'Fehler'
             todayCbxCounter = todayCbxCounter + 1
+
+        i = 1
+        while NIBfehlerWB.cell(row=i, column=1).value != None:
+            searchTerm = NIBfehlerWB.cell(row=i, column=1).value
+            foundRow = searchXL(StatusWB, searchTerm, 1, "col")[0]
+            StatusWB.cell(row=foundRow, column=TodayColumn).value = "j"
+            i = i + 1
+
     # TODO: Gelb maikieren wenn Zustandänderung
         todayCbxCounter = 7
         my_yellow = styles.colors.Color(rgb='ffff00')
         my_fill = styles.fills.PatternFill(patternType='solid', fgColor=my_yellow)
         no_fill = styles.PatternFill(fill_type=None)
+
         while StatusWB.cell(row=todayCbxCounter, column=1).value != None:
             Value = StatusWB.cell(row=todayCbxCounter, column=TodayColumn).value
             ValueM1 = StatusWB.cell(row=todayCbxCounter, column=TodayColumn-1).value

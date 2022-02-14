@@ -68,7 +68,7 @@ def searchXL(ws, searchTerm, searchArea = 0, rowcol = "all"): # ws=Worksheet, se
         maxRow = ws.max_row
 
 
-    print("Fehlerhaft am " + datetime.today().strftime('%d.%m.'))
+    #print("Fehlerhaft am " + datetime.today().strftime('%d.%m.'))
     # for row in ws.iter_rows(max_col=1, max_row=10):
     #     for cell in row:
     #         print(cell.value)
@@ -83,11 +83,11 @@ def searchXL(ws, searchTerm, searchArea = 0, rowcol = "all"): # ws=Worksheet, se
             if cell.value == searchTerm:
                 Ycor = cell.row
                 Xcor = cell.column
-                print("Suchbegriff an Coordinate[" + str(cell.row) + "," + str(cell.column) + "] gefunden" )  # change column number for any cell value you want
+                #print("Suchbegriff an Coordinate[" + str(cell.row) + "," + str(cell.column) + "] gefunden" )  # change column number for any cell value you want
                 break
 
-    if Xcor == "notFound":
-        print("nichts gefunden")
+    #if Xcor == "notFound":
+        #print("nichts gefunden")
 
     return Ycor, Xcor
 
