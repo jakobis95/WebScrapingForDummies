@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/Info.json" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/TransactionData.json" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/TransactionData.txt" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/TransactionDataGathering.py" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/alle.json" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/hello.py" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/offline.json" charset="windows-1252" />
+    <file url="file://$PROJECT_DIR$/refreshtoken.txt" charset="windows-1252" />
+    <file url="PROJECT" charset="UTF-8" />
+  </component>
+</project>

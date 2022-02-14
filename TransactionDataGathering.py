@@ -198,6 +198,7 @@ if __name__ == '__main__':
 
     #Create Session for Backend
     s = requests.session()
+
     atoken = refreshT(s)
     #Downloads a list of all active Chargebox Charge Points
     #Update_CBXCP_list(CPsListname, atoken, s)
