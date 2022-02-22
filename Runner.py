@@ -191,8 +191,8 @@ def refreshT(s): # Hier wird der Token refreshed
 
     p = s.post(url, headers=headers, verify=False, data = payload )
     print(p)
-    #with open('refreshtoken.txt', 'w') as f:
-        #f.write(p.text)
+    with open('refreshtoken.txt', 'w') as f:
+        f.write(p.text)
     return p
 
 def authLoopRequest(s):
@@ -204,6 +204,7 @@ def authLoopRequest(s):
             tokentxt = input("Bitte geben Sie einen gültigen Token ein:")
             with open('refreshtoken.txt', 'w') as f:
                 f.write(tokentxt)
+                f.close()
             p = refreshT(s)
     print("auth erfolgreich")
 

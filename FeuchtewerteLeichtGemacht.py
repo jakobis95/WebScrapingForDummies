@@ -1,11 +1,34 @@
 import json
 import os
-from Runner import refreshT
+from Runner import refreshT, authLoopRequest
 from openpyxl import Workbook,load_workbook
 import requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from NavigateInExcel import searchXL, conditional_formatting_with_rules
 from datetime import datetime
 import time
+# Print iterations progress
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█'):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print('\r', f'\r{prefix} |{bar}| {percent}% {suffix}', end = '')
+    # Print New Line on Complete
+    if iteration == total:
+        print()
+
 def findTodayCol(worksheet):
     # soll die letzte beschriebene Spalte finden
     LastCol = worksheet.max_column
@@ -15,10 +38,8 @@ def findTodayCol(worksheet):
     while ok != True:
         WasStehtHierDrinne = worksheet.cell(row=1, column=LastCol - i).value
         if WasStehtHierDrinne != None:
-            print("Letze Spalte", LastCol - i, " mit Inhalt", WasStehtHierDrinne)
             ok = True
         else:
-            print("Letze Spalte hat keinen Inalt counter =", i)
             i = i + 1
 
     LastCol = LastCol - i
@@ -50,10 +71,11 @@ def BackendRequestTemplate(atoken, url, s):
     #print("return P.TEXT")
     return p
 
-def auswertungBackenddaten(obj, atoken, s, filepath):
+def auswertungBackenddaten(obj, atoken, s, filepath, MinutesBetweenUpdates):
+    requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
     uniqueIdlcp = ""
     humidity = "999"
-    print("Auswertung")
+    print("Auswertung gestartet")
     i = 1
     wb = load_workbook(filename=filepath)
     FeuchteTbl = wb.worksheets[0]
@@ -79,24 +101,37 @@ def auswertungBackenddaten(obj, atoken, s, filepath):
     lastHumidityUpdateTime = datetime.strptime(lastHumidityUpdateLog,'%Y-%m-%d %H:%M:%S.%f')
     timeSinceLastUpdate = curDateTime - lastHumidityUpdateTime
     print("minutes since last Update:", timeSinceLastUpdate)
-    #Updates chargebox measurements in Backend
-    if timeSinceLastUpdate.total_seconds()/60 <= 30:
-        print("Feuchte Werte sind noch aktuell")
+    #Anzahl Standorte Gesamt zählen
+    i = 1
     for elements in obj:
         if str(elements['uniqueId'])[13:18] == "CPN01":
-            url = "https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:13] + "LMS01/request?lmsGlobalId=0000000000000005010f&force=true"
-            update_message = BackendRequestTemplate(atoken, url, s)
-            print(str(elements['uniqueId'])[13:18] + " i=" + str(j))
-            CPlist.append(elements)
-            j= j +1
-    lastHumidityUpdateLog = open("lastHumidityUpdateLog", "w")
-    lastHumidityUpdateLog.write(str(curDateTime))
+            i = i + 1
+    l = i
+    i = 1
+    #Updates chargebox measurements in Backend
+    #todo eine Abfrage die entscheided ob die Feuchte Werte nochmal geupdated werden sollen
+    #todo eine Abfrage wann der letzte Wert erfolgreich in die Exceltabelle eingetragen wurde
+    if timeSinceLastUpdate.total_seconds()/60 <= MinutesBetweenUpdates:
+        print("Feuchte Werte sind noch aktuell")
+    else:
+        printProgressBar(0, l, prefix='Humidity Update Progress:', suffix='Complete', length=50)
+        for elements in obj:
+            if str(elements['uniqueId'])[13:18] == "CPN01":
+                url = "https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:13] + "LMS01/request?lmsGlobalId=0000000000000005010f&force=true"
+                update_message = BackendRequestTemplate(atoken, url, s)
+                time.sleep(0.1)
+                # Update Progress Bar
+                printProgressBar(i + 1, l, prefix='Humidity Update Progress:', suffix='Complete', length=50)
+                CPlist.append(elements)
+                j= j +1
+                i = i +1
+        lastHumidityUpdateLog = open("lastHumidityUpdateLog", "w")
+        lastHumidityUpdateLog.write(str(curDateTime))
 
     i = 1
     #Pulls chargebox mesurement data from Backend
+    #Wenn Feuchtewerte erst vor kurzem geupdated wurden dann werden die Standorte nicht geupdated und keine CPlist erstellt.
     for elements in CPlist:
-        print(str(elements['uniqueId'])[13:18])
-        print(str(elements['uniqueId']))
         url = "https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:13] + "LMS01?lmsGlobalId=00000000000e0005010f"
         measurement = BackendRequestTemplate(atoken, url, s)
         measurementJ = measurement.json()
@@ -105,10 +140,8 @@ def auswertungBackenddaten(obj, atoken, s, filepath):
             humidity = 255
         else:
             if content['idents'][14]['value'] == "Closed" or content['idents'][14]['value'] == "" :
-                print(content['idents'][14]['value'])
                 humidity = 999
             elif content['idents'][14]['value'].isnumeric() == True:
-                #print(content['idents'][14]['value'])
                 humidity = content['idents'][14]['value']
             else:
                 print("not numeric" + content['idents'][14]['value'])
@@ -121,7 +154,6 @@ def auswertungBackenddaten(obj, atoken, s, filepath):
             if FeuchteTbl.cell(row=Xcp, column=TodayCol).value == None:
                 FeuchteTbl.cell(row=Xcp, column=TodayCol).value = "0"
 
-            print("feuchte", int(humidity))
             FeuchteTbl.cell(row=Xcp, column=TodayCol).value = int(humidity)
             FeuchteTbl.cell(row=Xcp, column=FirmwareCol).value = str(elements['firmwareVersion'])
             print("Tabellenwert Heute:", FeuchteTbl.cell(row=Xcp, column=TodayCol).value," - ", FeuchteTbl.cell(row=Xcp, column=TodayCol-2).value)
@@ -142,32 +174,23 @@ def auswertungBackenddaten(obj, atoken, s, filepath):
 
     conditional_formatting_with_rules(FeuchteTbl, TodayCol)
     wb.save(filepath)
-
 if __name__ == "__main__":
     i = 0
-    #url = "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=1000&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=ACTIVE&status=FAULTED&status=INACTIVE"
     url = "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=1000&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC"
     s = requests.session()
     UserName = os.getlogin()
 
     filepath = "C:\\Users\\"+ str(UserName) +"\\Dr. Ing. h.c. F. Porsche AG\\Rollout KLL - Task Force HVAC\\Feuchte_Overview_CBX.xlsx"
-    #filepath = r'C:\Users\FO4A5OY\Dr. Ing. h.c. F. Porsche AG\Rollout KLL - Task Force HVAC\Feuchte_Overview_CBX.xlsx'
-    refreshT(s)
-    with open('token2.txt', 'r') as jsonf:
+    authLoopRequest(s)
+    with open('refreshtoken.txt', 'r') as jsonf:
         data = json.load(jsonf)
         print("vergleich")
         print(data['refresh_token'])
     atoken = 'Bearer ' + data['access_token']
     data = BackendRequestTemplate(atoken, url, s)
     data = OnlyUsableDestinations(data)
-    #print(data)
     f = open("UsableDestinationsDaily.txt", 'w')
     f.write(json.dumps(data))
-    auswertungBackenddaten(data, atoken, s, filepath)
+    auswertungBackenddaten(data, atoken, s, filepath, MinutesBetweenUpdates=30)
 
     os.startfile(filepath)
-    # wb = load_workbook(filename='PythonZuExcel.xlsx')
-    # FeuchteTbl = wb.worksheets[0]
-    # LastCol = findTodayCol(FeuchteTbl)
-    # for i in range(1,100):
-    #     print(FeuchteTbl.cell(row=i, column=LastCol).value)
