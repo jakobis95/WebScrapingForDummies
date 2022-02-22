@@ -98,9 +98,10 @@ def Update_CBX_Transaction_DB(Session, Filename,CPsListname, atoken):
         else:
             i = i+1
     lastIDIndex = i
-    #LastIDIndex wird um 1 erhöht um den Nächsten Chargepoint abzufragen
+    #LastIDIndex wird um 1 erhÃ¶ht um den NÃ¤chsten Chargepoint abzufragen
     firstNewIndex = lastIDIndex + 1
-    i
+    i=0
+
     for index in range(firstNewIndex, objectCount):
         i = i+1
         CP = obj[index]
@@ -113,7 +114,16 @@ def Update_CBX_Transaction_DB(Session, Filename,CPsListname, atoken):
             if TransactionDataCP['totalElements'] >= 100:
                 #time.sleep(5)
                 TransactionDataCP = TransactionDownload(Filename, atoken, payload, Session, size=TransactionDataCP['totalElements'])
-            JSONappend(Filename, TransactionDataCP)
+            if 'status' in TransactionDataCP:
+                print("an error occoured with :", payload)
+                time.sleep(5)
+                TransactionDataCP = TransactionDownload(Filename, atoken, payload, Session, size=1000)
+                if 'status' in TransactionDataCP:
+                    print("an error occoured with :", payload)
+                else:
+                    JSONappend(Filename, TransactionDataCP)
+            else:
+                JSONappend(Filename, TransactionDataCP)
             atoken = refreshT(s)
         else: break
     print(i)
@@ -194,8 +204,8 @@ def refreshT(s): # Hier wird der Token refreshed
 
 if __name__ == '__main__':
     Filename = 'TransactionData.txt'
-    Filename2 = 'TransactionData3.txt'
-    XLSXname = 'TransactionData3.xlsx'
+    Filename2 = 'TransactionData4.txt'
+    XLSXname = 'TransactionData4.xlsx'
     CPsListname = 'AllCPs.text'
 
     #Create Session for Backend
@@ -209,14 +219,11 @@ if __name__ == '__main__':
     #Downloads all Transaction data for the in Payload defined CPs
     #print(TransactionDownload(Filename, atoken, 'DE9110000079_CPN02', s, size=2000))
 
-    #Create_XLSX_From_Json(Filename, XLSXname)
-
-
     #creates a complete Transaction dataset
-    #Update_CBX_Transaction_DB(s,Filename2, CPsListname, atoken)
-    #JSONappend(Filename)
-    #f = open(CPsListname)
-    #CPList = json.load(f)
-    #for standort in CPList:
-        #print(standort["manufacturerModelId"]["name"])
-    create_empty_json(s,atoken,Filename2)
+    Update_CBX_Transaction_DB(s,Filename2, CPsListname, atoken)
+    Create_XLSX_From_Json(Filename2, XLSXname)
+    f = open(CPsListname)
+    CPList = json.load(f)
+    for standort in CPList:
+        print(standort["manufacturerModelId"]["name"])
+    #create_empty_json(s,atoken,Filename2)

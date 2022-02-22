@@ -90,6 +90,49 @@ def CpPressureToXl(data, atoken, s):
             atoken = GetAToken(s)
     wb.save('PythonZuExcelWithPressure.xlsx')
 
+def CpPressureToXl101(data, atoken, s):
+    wb = load_workbook(filename=r'C:\Users\FO4A5OY\OneDrive - Dr. Ing. h.c. F. Porsche AG\CablepressureAnalisys\chargeTimeDataset.xlsx')
+    FeuchteTbl = wb.worksheets[0]
+    FeedbackTbl = wb.worksheets[1]
+    CablePrs = searchXL(FeuchteTbl, "cablePressure")[1]
+    j = 2
+    for element in data:
+        print(element)
+        CPdata = PullPressure(element, atoken, s)
+        searchStr = str(element['uniqueId'])
+        Xcp = searchXL(FeuchteTbl, searchStr)[0]
+        if Xcp != "notFound":
+            if str(element['uniqueId'])[17] == "1":
+                print("CP 1 found")
+                i = 0
+            elif str(element['uniqueId'])[17] == "2":
+                print("CP 2 found")
+                i = 1
+            else:
+                print("error CP ID besides 1 or 2 found")
+                break
+            print(CPdata)
+            if CPdata['message'] != None:
+                FeuchteTbl.cell(row=Xcp, column=CablePrs).value = float(CPdata['message']['idents'][16]['value'])
+            else:
+                FeuchteTbl.cell(row=Xcp, column=CablePrs).value = float(404)
+            FeuchteTbl.cell(row=Xcp, column=CablePrs + 1).value = str(element['masterData']['chargePointName'])
+            FeuchteTbl.cell(row=Xcp, column=CablePrs + 2).value = str(element['firmwareVersion'])
+            FeedbackMessage = "Found in Row:" + str(Xcp)
+        else:
+            FeedbackMessage = "NotFound"
+        FeedbackTbl.cell(row=j, column=1).value = str(element['uniqueId'])[:2]
+        FeedbackTbl.cell(row=j, column=2).value = str(element['masterData']['chargingFacilities'][0]['power'])
+        FeedbackTbl.cell(row=j, column=3).value = str(element['uniqueId'])
+        FeedbackTbl.cell(row=j, column=4).value = str(element['masterData']['chargePointName'])
+        FeedbackTbl.cell(row=j, column=5).value = str(element['firmwareVersion'])
+        FeedbackTbl.cell(row=j, column=6).value = str(element['uniqueId'])[13:]
+        FeedbackTbl.cell(row=j, column=7).value = FeedbackMessage
+        j = j + 1
+        if j % 10 == 0:
+            atoken = GetAToken(s)
+    wb.save(r'C:\Users\FO4A5OY\OneDrive - Dr. Ing. h.c. F. Porsche AG\CablepressureAnalisys\chargeTimeDataset.xlsx')
+
 def GetAToken(s):
     url = "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=1000&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC"
     refreshT(s)
@@ -119,8 +162,11 @@ if __name__ == "__main__":
         #Update(element, atoken, s)
     print("update fertig")
     atoken = GetAToken(s)
+    #Cable pressure get written into a XL this is the Standart option
+    #CpPressureToXl(CPplaces, atoken, s)
 
-    CpPressureToXl(CPplaces, atoken, s)
+    #Cable pressure gets written in one Time needed excel that is only so special accaitions
+    CpPressureToXl101(CPplaces, atoken, s)
 
     os.startfile('PythonZuExcelWithPressure.xlsx')
     # wb = load_workbook(filename='PythonZuExcel.xlsx')
