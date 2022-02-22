@@ -166,7 +166,7 @@ def BackendRequestTemplate(atoken, url, s, i):
 
 def refreshT(s): # Hier wird der Token refreshed
     #die verwendete Json datei wird aus dem Browser kopiert
-    with open('token2.txt', 'r') as jsonf:
+    with open('refreshtoken.txt', 'r') as jsonf:
         data = json.load(jsonf)
         print(data['refresh_token'])
 
@@ -191,14 +191,24 @@ def refreshT(s): # Hier wird der Token refreshed
 
     p = s.post(url, headers=headers, verify=False, data = payload )
     print(p)
-    with open('token2.txt', 'w') as f:
-        f.write(p.text)
+    #with open('refreshtoken.txt', 'w') as f:
+        #f.write(p.text)
+    return p
 
-    # with open('token2.txt', 'r') as jsonf:
-    #     data = json.load(jsonf)
-    #     print("vergleich")
-    #     print( data['refresh_token'])
-    #     print('Bearer ' + data['access_token'])
+def authLoopRequest(s):
+    p = 999
+    p = refreshT(s)
+    while p.status_code != 200:
+        if p.status_code != 200:
+            print("Ihr aktueller Token ist abgelaufen")
+            tokentxt = input("Bitte geben Sie einen gültigen Token ein:")
+            with open('refreshtoken.txt', 'w') as f:
+                f.write(tokentxt)
+            p = refreshT(s)
+    print("auth erfolgreich")
+
+
+
 def get_error_msg(fehlerstandorte):
     Status = ""
     StatusListe = []
@@ -242,7 +252,8 @@ if __name__ == '__main__':
     urllist = ["https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=FAULTED",
             "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=INACTIVE"
             ]
-
+    s = requests.session()
+    refreshT(s)
 
     with open('token2.txt', 'r') as jsonf:
         data = json.load(jsonf)
