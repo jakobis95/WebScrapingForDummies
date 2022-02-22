@@ -166,7 +166,7 @@ def BackendRequestTemplate(atoken, url, s, i):
 
 def refreshT(s): # Hier wird der Token refreshed
     #die verwendete Json datei wird aus dem Browser kopiert
-    with open('refreshtoken.txt', 'r') as jsonf:
+    with open('token2.txt', 'r') as jsonf:
         data = json.load(jsonf)
         print(data['refresh_token'])
 
@@ -242,8 +242,8 @@ if __name__ == '__main__':
     urllist = ["https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=FAULTED",
             "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=INACTIVE"
             ]
-    s = requests.session()
-    refreshT(s) 
+
+
     with open('token2.txt', 'r') as jsonf:
         data = json.load(jsonf)
         print("vergleich")
