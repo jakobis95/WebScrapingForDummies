@@ -202,7 +202,7 @@ def authLoopRequest(s):
     while p.status_code != 200:
         if p.status_code != 200:
             print("Ihr aktueller Token ist abgelaufen")
-            tokentxt = input("Bitte geben Sie einen gültigen Token ein:")
+            tokentxt = input("Bitte geben Sie einen gültigen Token ein und bestätigen mit Enter:")
             with open('refreshtoken.txt', 'w') as f:
                 f.write(tokentxt)
                 f.close()
