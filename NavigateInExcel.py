@@ -5,7 +5,9 @@ from datetime import datetime
 from openpyxl.formatting.rule import ColorScale, FormatObject, CellIsRule
 from openpyxl.styles import Color, PatternFill, Font, Border
 from openpyxl.styles.differential import DifferentialStyle
-
+"""
+    Hallo das ist ein gut lesbares Kommentar
+"""
 def conditional_formatting_with_rules(ws, todayCol):
     #styles
     greyFill = PatternFill(start_color='D9D9D9', end_color='D9D9D9', fill_type='solid')

@@ -1,9 +1,7 @@
 import json
 import os
-from Runner import refreshT
 from openpyxl import Workbook,load_workbook, styles
-import requests
-from NavigateInExcel import searchXL, conditional_formatting_with_rules
+from NavigateInExcel import searchXL
 from datetime import datetime
 
 def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):

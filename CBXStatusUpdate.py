@@ -2,7 +2,8 @@
 import requests
 import json
 import time
-
+import os
+from FillCbxStatus import WriteStatusToXL
 #from SessionPPN_call import refreshT
 
 
@@ -254,9 +255,9 @@ if __name__ == '__main__':
             "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=INACTIVE"
             ]
     s = requests.session()
-    refreshT(s)
+    authLoopRequest(s)
 
-    with open('token2.txt', 'r') as jsonf:
+    with open('refreshtoken.txt', 'r') as jsonf:
         data = json.load(jsonf)
         print("vergleich")
         print( data['refresh_token'])
@@ -275,3 +276,4 @@ if __name__ == '__main__':
 
     f = open("fehlerstandorteStatus.text", 'w')
     f.write(json.dumps(fehlerstandorteStatus))
+

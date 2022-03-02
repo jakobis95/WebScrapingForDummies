@@ -1,6 +1,6 @@
 import json
 import os
-from Runner import refreshT, authLoopRequest
+from CBXStatusUpdate import refreshT, authLoopRequest
 from openpyxl import Workbook,load_workbook
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -106,6 +106,7 @@ def auswertungBackenddaten(obj, atoken, s, filepath, MinutesBetweenUpdates):
     for elements in obj:
         if str(elements['uniqueId'])[13:18] == "CPN01":
             i = i + 1
+            CPlist.append(elements)
     l = i
     i = 1
     #Updates chargebox measurements in Backend
@@ -122,7 +123,6 @@ def auswertungBackenddaten(obj, atoken, s, filepath, MinutesBetweenUpdates):
                 time.sleep(0.1)
                 # Update Progress Bar
                 printProgressBar(i + 1, l, prefix='Humidity Update Progress:', suffix='Complete', length=50)
-                CPlist.append(elements)
                 j= j +1
                 i = i +1
         lastHumidityUpdateLog = open("lastHumidityUpdateLog", "w")

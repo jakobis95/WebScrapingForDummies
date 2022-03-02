@@ -4,7 +4,7 @@ from FeuchtewerteLeichtGemacht import BackendRequestTemplate
 import json
 import time
 from openpyxl import Workbook,load_workbook
-from Runner import  BackendRequestTemplate as BackReqTem
+from CBXStatusUpdate import  BackendRequestTemplate as BackReqTem
 
 
 def TransactionDownload(Filename, atoken, CPid, s, size=50):
