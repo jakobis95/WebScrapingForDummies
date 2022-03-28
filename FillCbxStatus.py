@@ -73,6 +73,7 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
                 TodayFehlerWB.cell(row=todayCbxCounter, column=2).value = 'Gefunden'
             else:
                 TodayFehlerWB.cell(row=todayCbxCounter, column=2).value = 'nicht Gefunden'
+                TodayFehlerWB.cell(row=todayCbxCounter, column=5).value = item['ErrorMessage']
 
             TodayFehlerWB.cell(row=todayCbxCounter, column=1).value = item['uniqueId']
             TodayFehlerWB.cell(row=todayCbxCounter, column=3).value = item['chargePointName']
@@ -86,7 +87,7 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
             StatusWB.cell(row=foundRow, column=TodayColumn).value = "j"
             i = i + 1
 
-    # TODO: Gelb maikieren wenn Zustandänderung
+
         todayCbxCounter = 7
         my_yellow = styles.colors.Color(rgb='ffff00')
         my_fill = styles.fills.PatternFill(patternType='solid', fgColor=my_yellow)
@@ -113,8 +114,9 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
 #def WriteStatusToXL(offlineCBX, fehlerCBX, xlsxPfad):
 
 if __name__ == "__main__":
-    xlsxPfad = r"C:\Users\FO4A5OY\OneDrive - Dr. Ing. h.c. F. Porsche AG\LE_Failure_Analysis\CBX_Fehlerliste_AutoPyTesting.xlsx"
-
+    UserName = os.getlogin()
+    #xlsxPfad = r"C:\Users\FO4A5OY\OneDrive - Dr. Ing. h.c. F. Porsche AG\LE_Failure_Analysis\CBX_Fehlerliste_AutoPyTesting.xlsx"
+    xlsxPfad = "C:\\Users\\" + str(UserName) + "\\OneDrive - Dr. Ing. h.c. F. Porsche AG\\General\\Task Force HVAC\\PythonSkripteZurBackendAnalyse\\CBX_Fehlerliste_AutoPyTesting.xlsx"
     #WriteStatusToXL(offlineCBX, fehlerCBX, xlsxPfad)
     #WriteStatusToXL( xlsxPfad, offlineCBX, offlineCBX)
     f = open("fehlerstandorteStatus.text", 'r')
@@ -129,6 +131,6 @@ if __name__ == "__main__":
         print(element)
 
     WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX)
-    xlsxPfad = r"C:\Users\FO4A5OY\OneDrive - Dr. Ing. h.c. F. Porsche AG\LE_Failure_Analysis\CBX_Fehlerliste_AutoPyTesting.xlsx"
+    #xlsxPfad = r"C:\Users\FO4A5OY\OneDrive - Dr. Ing. h.c. F. Porsche AG\LE_Failure_Analysis\CBX_Fehlerliste_AutoPyTesting.xlsx"
     #os.system('start  "excel" "C:\\Users\\FO4A5OY\\OneDrive - Dr. Ing. h.c. F. Porsche AG\\LE_Failure_Analysis\\CBX_Fehlerliste_AutoPyTesting.xlsx"')
     os.startfile(xlsxPfad)

@@ -98,7 +98,7 @@ def Update_CBX_Transaction_DB(Session, Filename,CPsListname, atoken):
         else:
             i = i+1
     lastIDIndex = i
-    #LastIDIndex wird um 1 erhöht um den Nächsten Chargepoint abzufragen
+    #LastIDIndex wird um 1 erhoht um den Nachsten Chargepoint abzufragen
     firstNewIndex = lastIDIndex + 1
     i
     for index in range(firstNewIndex, objectCount):
@@ -194,8 +194,8 @@ def refreshT(s): # Hier wird der Token refreshed
 
 if __name__ == '__main__':
     Filename = 'TransactionData.txt'
-    Filename2 = 'TransactionData3.txt'
-    XLSXname = 'TransactionData3.xlsx'
+    Filename2 = 'TransactionData3x.txt'
+    XLSXname = 'TransactionData3x.xlsx'
     CPsListname = 'AllCPs.text'
 
     #Create Session for Backend
