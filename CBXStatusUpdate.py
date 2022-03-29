@@ -1,14 +1,7 @@
-#from bs4 import BeautifulSoup
 import requests
 import json
 import time
-import os
-from FillCbxStatus import WriteStatusToXL
-#from SessionPPN_call import refreshT
 
-
-import certifi #brauche ich gerade wohl nicht
-import urllib3 #brauche ich gerade wohl nicht
 
 def updateCBXdisplay(CP, atoken, s):
     elements = CP
@@ -28,13 +21,11 @@ def updateCBXdisplay(CP, atoken, s):
     url = ("https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[
                                                                                    :12] + "_LMS01/request?lmsGlobalId=00000000000100030" +
            str(elements['uniqueId'])[17] + "0a&force=true")
-    # url = ("https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:12] + "_LMS01/request?lmsGlobalId=de911000016700030"+ str(elements['uniqueId'])[17] +"0a&force=true")
     s.get(url, headers=headers, verify=False)
 
     time.sleep(2)
     # update error message board
-    url = ("https://api.chargepoint-management.com/maintenance/v1/dtcs/" + str(elements['uniqueId'])[
-                                                                           :12] + "_LMS01/request?lmsGlobalId=00000000000100050" +
+    url = ("https://api.chargepoint-management.com/maintenance/v1/dtcs/" + str(elements['uniqueId'])[:12] + "_LMS01/request?lmsGlobalId=00000000000100050" +
            str(elements['uniqueId'])[17] + "0f&dtcStatus=31&force=true")
     s.get(url, headers=headers, verify=False)
     time.sleep(2)
@@ -58,7 +49,6 @@ def getCBXdata(CP, atoken, s):
            str(elements['uniqueId'])[17] + "0a")
     print(url)
     CPdata = s.get(url, headers=headers, verify=False)
-    # time.sleep(1)
     CPdataJ = CPdata.json()
 
     # get error message from Chargepoint
@@ -67,21 +57,17 @@ def getCBXdata(CP, atoken, s):
            str(elements['uniqueId'])[17] + "0f")
     print(url)
     errorData = s.get(url, headers=headers, verify=False)
-    #time.sleep(1)
     errorJ = errorData.json()
     errorStr = "X"
     print(errorJ)
 
     return CPdataJ, errorJ, errorStr
 def cpstate(fehlerstandorte):
-    Status = ""
     StatusListe = []
 
     for elements in fehlerstandorte:
-        #if elements['uniqueId'][:12] == elementsM1['uniqueId'][:12]:
-            #time.sleep(2)
         updateCBXdisplay(elements, atoken,s)
-        #elementsM1 = elements
+
 #fehlerstandorte durchgehen
     f = open("JSONsample.txt")
     JSONlist = json.load(f)
@@ -92,16 +78,7 @@ def cpstate(fehlerstandorte):
         errorJ = Data[1]
         errorStr = Data[2]
 
-        i = 0
-        # while errorJ['message'] == None and i < 2:
-        #     updateCBXdisplay(elements)
-        #     time.sleep(1)
-        #     Data = getCBXdata(elements)
-        #     CPdataJ = Data[0]
-        #     errorJ = Data[1]
-        #     errorStr = Data[2]
-        #     i = i+1
-        #     print("Versuch", i)
+
         if errorJ['message'] == None:
             errorStr = "No error Data"
         else:
@@ -112,7 +89,6 @@ def cpstate(fehlerstandorte):
             Status = "Error"
         else:
             Status = str(CPdataJ['message']['idents'][8]['value'])
-        #print(str(elements['masterData']['chargePointName']) + " : " +str(elements['uniqueId']) + " : " + Status)
         StatusListe.append( Status + " : " + str(elements['masterData']['chargePointName']) + " : " +str(elements['uniqueId'] +" : " + errorStr
                                                                                                          ))
 
@@ -130,10 +106,7 @@ def cpstate(fehlerstandorte):
     return JSONlist
 
 def BackendRequestTemplate(atoken, url, s, i):
-    http = urllib3.PoolManager()
-    CPList = []
 
-    #url = 'https://api.chargepoint-management.com/maintenance/v1/measurements/ES9110000135_LMS01?lmsGlobalId=00000000000e0005010f'
     headers = {
         'authority': 'api.chargepoint-management.com',
         'accept': 'application/json, text/plain, */*',
@@ -161,9 +134,7 @@ def BackendRequestTemplate(atoken, url, s, i):
                     CPList.append(elements)
 
     return CPList
-    # r = http.request('GET', 'https://api.chargepoint-management.com/status/connectionStatusList', headers=headers)
-    # print(r.headers)
-    # print(json.loads(r.data))
+
 
 def refreshT(s): # Hier wird der Token refreshed
     #die verwendete Json datei wird aus dem Browser kopiert

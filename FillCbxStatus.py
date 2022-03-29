@@ -10,11 +10,10 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
     todayCbxCounter = 1
     StatusWB = wb["cbxStatusListe"]
     TodayFehlerWB = wb["overviewToday"]
-    NIBfehlerWB = wb["NIBfehler"]
+    NIBfehlerWB = wb["NIBfehler"] #NIB steht für "nicht im backend"
     NIBofflineWB = wb["NIBoffline"]
     LastRow = StatusWB.max_row
     TodayColumnString = "Fehlerhaft am " + datetime.today().strftime('%d.%m.%Y')
-    #TodayColumnString = "Fehlerhaft am 28.01.2022"
     #finds Column with the date of today
     TodayCell = searchXL(StatusWB, TodayColumnString)
     TodayColumn = TodayCell[1]
@@ -108,17 +107,15 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
 
     else:
         print("Es konnte kein Spalte mit dem heutigen Datum gefunden werden. Prüfen Sie die Excel-datei.")
-    # print(searchXL(StatusWB, "Hello was geht"))
+
     wb.save(xlsxPfad)
 
-#def WriteStatusToXL(offlineCBX, fehlerCBX, xlsxPfad):
+
 
 if __name__ == "__main__":
     UserName = os.getlogin()
-    #xlsxPfad = r"C:\Users\FO4A5OY\OneDrive - Dr. Ing. h.c. F. Porsche AG\LE_Failure_Analysis\CBX_Fehlerliste_AutoPyTesting.xlsx"
     xlsxPfad = "C:\\Users\\" + str(UserName) + "\\OneDrive - Dr. Ing. h.c. F. Porsche AG\\General\\Task Force HVAC\\PythonSkripteZurBackendAnalyse\\CBX_Fehlerliste_AutoPyTesting.xlsx"
-    #WriteStatusToXL(offlineCBX, fehlerCBX, xlsxPfad)
-    #WriteStatusToXL( xlsxPfad, offlineCBX, offlineCBX)
+
     f = open("fehlerstandorteStatus.text", 'r')
     fehlerCBX = json.load(f)
     for element in fehlerCBX:
@@ -131,6 +128,4 @@ if __name__ == "__main__":
         print(element)
 
     WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX)
-    #xlsxPfad = r"C:\Users\FO4A5OY\OneDrive - Dr. Ing. h.c. F. Porsche AG\LE_Failure_Analysis\CBX_Fehlerliste_AutoPyTesting.xlsx"
-    #os.system('start  "excel" "C:\\Users\\FO4A5OY\\OneDrive - Dr. Ing. h.c. F. Porsche AG\\LE_Failure_Analysis\\CBX_Fehlerliste_AutoPyTesting.xlsx"')
     os.startfile(xlsxPfad)
