@@ -220,6 +220,19 @@ if __name__ == '__main__':
         print("vergleich")
         print( data['refresh_token'])
     atoken = 'Bearer ' + data['access_token']
+    input = "input"
+    while input != "n" or "y":
+        input = input("Möchten Sie mit einem Leeren Datenset Starten? y fuer Yes und n fuer No")
+    if input != "y":
+        print("Daten werden ab dem letzten Eintrag in der letzten Datei fortgeführt")
+    else:
+        create_empty_json(s, atoken, Filename2)
+        #Downloads a list of all active Chargebox Charge Points
+        Update_CBXCP_list(CPsListname, atoken, s)
+        print("Leere Datei wird erstellt")
+
+
+
     #Downloads a list of all active Chargebox Charge Points
     #Update_CBXCP_list(CPsListname, atoken, s)
     #chargePointsIds = []
@@ -234,4 +247,4 @@ if __name__ == '__main__':
     CPList = json.load(f)
     for standort in CPList:
         print(standort["manufacturerModelId"]["name"])
-    #create_empty_json(s,atoken,Filename2)
+
