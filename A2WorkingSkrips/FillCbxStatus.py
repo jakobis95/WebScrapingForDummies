@@ -63,6 +63,7 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
             print(searchTerm)
             foundRow = searchXL(StatusWB, searchTerm, 1, "col")[0]
             print("XX ", foundRow)
+            print(item['ErrorMessage'])
 
             if foundRow != "notFound":
                 StatusWB.cell(row=foundRow, column=TodayColumn).value = "j"
@@ -70,10 +71,10 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
                 if StatusWB.cell(row=foundRow, column=TodayColumn-1).value != "j":
                     StatusWB.cell(row=foundRow, column=9).value = item['ErrorMessage']
                 TodayFehlerWB.cell(row=todayCbxCounter, column=2).value = 'Gefunden'
+                TodayFehlerWB.cell(row=todayCbxCounter, column=5).value = item['ErrorMessage']
             else:
                 TodayFehlerWB.cell(row=todayCbxCounter, column=2).value = 'nicht Gefunden'
                 TodayFehlerWB.cell(row=todayCbxCounter, column=5).value = item['ErrorMessage']
-
             TodayFehlerWB.cell(row=todayCbxCounter, column=1).value = item['uniqueId']
             TodayFehlerWB.cell(row=todayCbxCounter, column=3).value = item['chargePointName']
             TodayFehlerWB.cell(row=todayCbxCounter, column=4).value = 'Fehler'

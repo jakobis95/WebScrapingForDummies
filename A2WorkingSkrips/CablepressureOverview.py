@@ -47,7 +47,9 @@ def PullPressure(CP, atoken, s):
     CPdataJ = CPdata.json()
     return CPdataJ
 def CpPressureToXl(data, atoken, s):
-    wb = load_workbook(filename='../CablepressureAnalysis/PythonZuExcel.xlsx')
+    UserName = os.getlogin()
+    filepath = "C:\\Users\\" + str(UserName) + "\\OneDrive - Dr. Ing. h.c. F. Porsche AG\\General\\Task Force HVAC\\Feuchte_Overview_CBX.xlsx"
+    wb = load_workbook(filename=filepath)
     FeuchteTbl = wb.worksheets[0]
     FeedbackTbl = wb.worksheets[1]
     CablePrs1 = searchXL(FeuchteTbl, "cablePressure1")[1]
@@ -60,28 +62,40 @@ def CpPressureToXl(data, atoken, s):
         searchStr = str(element['uniqueId'])[:17] + "1"
         print("searchstr:", searchStr)
         Xcp = searchXL(FeuchteTbl, searchStr)[0]
-        if Xcp != "notFound" and CPdata['message']['idents'][8]['value'] != "State B - car connected":
-            if str(element['uniqueId'])[17] == "1":
-                print("CP 1 found")
-                i = 0
-            elif str(element['uniqueId'])[17] == "2":
-                print("CP 2 found")
-                i = 1
-            else:
-                print("error CP ID besides 1 or 2 found")
-                break
-            print(CPdata)
-            if CPdata['message'] != None:
-                FeuchteTbl.cell(row=Xcp, column=CablePrs[i]).value = CPdata['message']['idents'][16]['value']
-            else:
-                FeuchteTbl.cell(row=Xcp, column=CablePrs[i]).value = "None"
-            FeedbackMessage = "Found in Row:" + str(Xcp)
-
-        else:
+        if Xcp != "notFound" and CPdata['message'] != None:
             if CPdata['message']['idents'][8]['value'] != "State B - car connected":
-                FeedbackMessage = "NotFound"
+                if str(element['uniqueId'])[17] == "1":
+                    print("CP 1 found")
+                    i = 0
+                elif str(element['uniqueId'])[17] == "2":
+                    print("CP 2 found")
+                    i = 1
+                else:
+                    print("error CP ID besides 1 or 2 found")
+                    break
+                print(CPdata)
+                if CPdata['message'] != None:
+                    print(CPdata)
+                    Cable_Pressure = float(CPdata['message']['idents'][16]['value'])
+                    Cable_Cooling_Outlet_Temp = float(CPdata['message']['idents'][25]['value'])
+                    Cable_Cooling_Inlet_Temp = float(CPdata['message']['idents'][24]['value'])
+                    Cable_Temperature = float(CPdata['message']['idents'][19]['value'])
+                    Temperature_Cof = 0.013  # Temperaturkoeffizient/Grad des Druckes absolut auf 1,3Bar bei 10 Grad
+                    Mean_Cable_Temperature = (Cable_Temperature + Cable_Cooling_Outlet_Temp + Cable_Cooling_Inlet_Temp) / 3
+                    Temperature_Corrected_Cable_Pressure = (20 - Mean_Cable_Temperature) * Temperature_Cof + Cable_Pressure
+                    print("Druck Differenz", (Mean_Cable_Temperature - 20) * Temperature_Cof)
+                    print("Temperaturdifferenz:", Mean_Cable_Temperature - 20)
+                    print("Temperaturbereinigter Kabeldruck", Temperature_Corrected_Cable_Pressure)
+                    FeuchteTbl.cell(row=Xcp, column=CablePrs[i]).value = Temperature_Corrected_Cable_Pressure
+                else:
+                    FeuchteTbl.cell(row=Xcp, column=CablePrs[i]).value = "None"
+                FeedbackMessage = "Found in Row:" + str(Xcp)
+
             else:
-                FeedbackMessage = "Car Connected Measurement invalid"
+                if CPdata['message']['idents'][8]['value'] != "State B - car connected":
+                    FeedbackMessage = "NotFound"
+                else:
+                    FeedbackMessage = "Car Connected Measurement invalid"
         FeedbackTbl.cell(row=j, column=1).value = str(element['uniqueId'])[:2]
         FeedbackTbl.cell(row=j, column=2).value = str(element['masterData']['chargingFacilities'][0]['power'])
         FeedbackTbl.cell(row=j, column=3).value = str(element['uniqueId'])
@@ -92,7 +106,7 @@ def CpPressureToXl(data, atoken, s):
         j = j + 1
         if j % 10 == 0:
             atoken = GetAToken(s)
-    wb.save('PythonZuExcelWithPressure.xlsx')
+    wb.save(filepath)
 def CpPressureToXlRAW(data, atoken, s):
     #Fill Style definition
 
@@ -258,13 +272,13 @@ if __name__ == "__main__":
     print("update fertig")
     atoken = GetAToken(s)
     #Cable pressure get written into a XL this is the Standart option
-    #CpPressureToXl(CPplaces, atoken, s)
+    CpPressureToXl(CPplaces, atoken, s)
 
     #Cable pressure gets written in one Time needed excel that is only for special accaitions
     #CpPressureToXl101(CPplaces, atoken, s)
-    CpPressureToXlRAW(CPplaces, atoken, s)
+    #CpPressureToXlRAW(CPplaces, atoken, s)
 
-    os.startfile(r'C:\Users\FO4A5OY\OneDrive - Dr. Ing. h.c. F. Porsche AG\CablepressureAnalisys\Cable_Pressure_Temp_Raw.xlsx')
+    #os.startfile(r'C:\Users\FO4A5OY\OneDrive - Dr. Ing. h.c. F. Porsche AG\CablepressureAnalisys\Cable_Pressure_Temp_Raw.xlsx')
     # wb = load_workbook(filename='PythonZuExcel.xlsx')
     # FeuchteTbl = wb.worksheets[0]
     # LastCol = findTodayCol(FeuchteTbl)
