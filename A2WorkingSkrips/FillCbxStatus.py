@@ -107,7 +107,7 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
             todayCbxCounter = todayCbxCounter + 1
 
     else:
-        print("Es konnte kein Spalte mit dem heutigen Datum gefunden werden. Prüfen Sie die Excel-datei.")
+        print("Es konnte keine Spalte mit dem heutigen Datum gefunden werden. Prüfen Sie die Excel-datei.")
 
     wb.save(xlsxPfad)
 

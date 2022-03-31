@@ -197,15 +197,13 @@ def get_error_msg(fehlerstandorte):
     }
     for elements in fehlerstandorte:
         # update error message board
-        url = ("https://api.chargepoint-management.com/maintenance/v1/dtcs/" + str(elements['uniqueId'])[
-                                                                               :12] + "_LMS01/request?lmsGlobalId=00000000000100050" +
+        url = ("https://api.chargepoint-management.com/maintenance/v1/dtcs/" + str(elements['uniqueId'])[:12] + "_LMS01/request?lmsGlobalId=00000000000100050" +
                str(elements['uniqueId'])[17] + "0f&dtcStatus=31&force=true")
         s.get(url, headers=headers, verify=False)
 
     for elements in fehlerstandorte:
         # get error message from Chargepoint
-        url = ("https://api.chargepoint-management.com/maintenance/v1/dtcs/" + str(elements['uniqueId'])[
-                                                                               :12] + "_LMS01?lmsGlobalId=00000000000100050" +
+        url = ("https://api.chargepoint-management.com/maintenance/v1/dtcs/" + str(elements['uniqueId'])[:12] + "_LMS01?lmsGlobalId=00000000000100050" +
                str(elements['uniqueId'])[17] + "0f")
         print(url)
         errorData = s.get(url, headers=headers, verify=False)
