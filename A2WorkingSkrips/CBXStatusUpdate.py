@@ -217,7 +217,10 @@ def get_error_msg(fehlerstandorte):
             for error in errorJ['message']['dtcs']:
                 errorStr = "" +errorStr +"; " + error['dtcText']+ ""
             print(errorStr)
+        print("vergleich")
     return errorJ
+
+
 if __name__ == '__main__':
     i = 0
     urllist = ["https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=FAULTED",
@@ -228,7 +231,6 @@ if __name__ == '__main__':
 
     with open('DataFiles/refreshtoken.txt', 'r') as jsonf:
         data = json.load(jsonf)
-        print("vergleich")
         print( data['refresh_token'])
     atoken = 'Bearer ' + data['access_token']
     i = 0
