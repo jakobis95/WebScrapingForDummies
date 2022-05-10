@@ -5,10 +5,28 @@ from A3SupportingGeneralFunctions.NavigateInExcel import searchXL
 from datetime import datetime
 
 
-def changes(xlsxPfad, offlineCBX, fehlerCBX):
-    wb = load_workbook(filename=xlsxPfad)
+def createCPlist(xlsxPfad, fehlerCBX):
+    cpidLookup = list()
+    for item in fehlerCBX:
+        CPID = item['uniqueId']
+        CPID = CPID[:12]
+        print(CPID)
+        cpidLookup.append(CPID)
+    return cpidLookup
+def defineFullOrPart(cpidLookup,cpid,cpNo):
+    cpid = cpid[:12]
+    cpsAmount = cpidLookup.count(cpid)
+
+    if cpsAmount < cpNo:
+        Status = "No/Part"
+        return Status
+    else:
+        Status = "No/Full"
+        return Status
+
 
 def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
+    cpidLookup = createCPlist(xlsxPfad, fehlerCBX)
     cp = 0
     wb = load_workbook(filename=xlsxPfad)
     todayCbxCounter = 1
@@ -20,11 +38,15 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
     CW = datetime.today().isocalendar()
     TodayColumnString = "Full/Part KW" + str(CW[1]) #todo gibt diese den Namen der Woche an.
     #finds Column with the date of today
+    cpNoCoordinate = searchXL(StatusWB, "hardware_prim_dc_no_chargers")
+    cpNoColumn = cpNoCoordinate[1]
     CPMID = searchXL(StatusWB, "CPM ID")  # findet jetzt die heutige Spalte
     cpmidColumn = CPMID[1]
     TodayCell = searchXL(StatusWB, TodayColumnString) #findet jetzt die heutige Spalte
+
     TodayColumn = TodayCell[1]
     TodayRow = TodayCell[0]
+    StatusWB.cell(row=TodayRow - 1, column=TodayColumn).value = "Heutige Spalte gefunden"
     #finds Column to display if cp1 and/or cp2 has a problem
     #todo wird nicht gebraucht
     # cp1Column = searchXL(StatusWB, "1")[1]
@@ -33,7 +55,7 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
 
     if TodayColumn != "notFound":
         print("XX today Column is:", TodayColumn)
-        #Fill in all destinations that are currently offline
+####################################################################Fill in all destinations that are currently offline
         for item in offlineCBX:
             if item['uniqueId'][17] == "1":
                 cp = 0
@@ -57,7 +79,7 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
             TodayFehlerWB.cell(row=todayCbxCounter, column=4).value = 'offline'
             todayCbxCounter = todayCbxCounter + 1
 
-        # Fill in all destinations that currently have a failure
+######################################################################## Fill in all destinations that currently have a failure
         for item in fehlerCBX:
 
             if item['uniqueId'][17] == "1":
@@ -70,11 +92,14 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
 
             print(searchTerm)
             foundRow = searchXL(StatusWB, searchTerm, cpmidColumn, "col")[0]
-            print("XX ", foundRow)
+            print("Fehlerhafter Standort in Reihe: ", foundRow)
             print(item['ErrorMessage'])
 
             if foundRow != "notFound":
-                StatusWB.cell(row=foundRow, column=TodayColumn).value = "j"
+                cpNo = StatusWB.cell(row=foundRow, column=cpNoColumn).value
+                Status = defineFullOrPart(cpidLookup, searchTerm[:12], cpNo)
+                print("Fehlerhafter Standort in Reihe: ", foundRow, "mit Status", Status)
+                StatusWB.cell(row=foundRow, column=TodayColumn).value = str(Status)
                 #StatusWB.cell(row=foundRow, column=cpColumn[cp]).value = "x"
                 if StatusWB.cell(row=foundRow, column=TodayColumn-1).value != "j":
                     print(item['ErrorMessage'])
@@ -124,8 +149,8 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
 
 if __name__ == "__main__":
     UserName = os.getlogin()
-    xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Downloads\\220506_Tracking IBN_KW18_Masterliste.xlsx"
-    xlsxPfadFeedback = "C:\\Users\\" + str(UserName) + "\\Desktop\\TrackingFeedback.xlsx"
+    xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Downloads\\IBN_SANDbox.xlsx"
+    #xlsxPfadFeedback = "C:\\Users\\" + str(UserName) + "\\Desktop\\TrackingFeedback.xlsx"
 
     f = open("C:/Users/AJ2MSGR/PycharmProjects/WebScrapingForDummies/A2WorkingSkrips/DataFiles/fehlerstandorteStatus.text", 'r')
     fehlerCBX = json.load(f)
