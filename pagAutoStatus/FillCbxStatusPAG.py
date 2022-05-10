@@ -4,6 +4,20 @@ from openpyxl import load_workbook, styles
 from A3SupportingGeneralFunctions.NavigateInExcel import searchXL
 from datetime import datetime
 
+def pOrN(StatusLastWeek, StatusThisWeek):
+    if StatusThisWeek == None:
+        StatusThisWeek = "no / offline"
+    if StatusLastWeek == None:
+        StatusLastWeek = "no / offline"
+    Zustand = {"yes": 1, "no / part": 2, "no / full": 3, "no / offline" : 4 }
+    change = Zustand[StatusLastWeek] - Zustand[StatusThisWeek]
+    if change >= 0:
+        if change < 1:
+            return "Gleich"
+        else:
+            return "Besser"
+    else:
+        return "Schlechter"
 
 def createCPlist(xlsxPfad, fehlerCBX):
     cpidLookup = list()
@@ -19,10 +33,10 @@ def defineFullOrPart(cpidLookup,cpid,cpNo):
     if cpNo == None:
         cpNo = 2
     if cpsAmount < cpNo:
-        Status = "No/Part"
+        Status = "no / part"
         return Status
     else:
-        Status = "No/Full"
+        Status = "no / full"
         return Status
 
 
@@ -35,6 +49,12 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
     TodayFehlerWB = wb["overviewToday"]
     NIBfehlerWB = wb["NIBfehler"] #NIB steht für "nicht im backend"
     NIBofflineWB = wb["NIBoffline"]
+    commission = searchXL(StatusWB, "Commissioning finalized")
+    commissionColumn = commission[1]
+    location = searchXL(StatusWB, "Location")
+    locationCol = location[1]
+    change = searchXL(StatusWB, "Veraenderung Vorwoche")
+    changeCol = change[1]
     LastRow = StatusWB.max_row
     CW = datetime.today().isocalendar()
     TodayColumnString = "Full/Part KW" + str(CW[1]) #todo gibt diese den Namen der Woche an.
@@ -69,7 +89,7 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
             foundRow = searchXL(StatusWB, searchTerm, cpmidColumn, "col")[0]
             print("XX ", foundRow)
             if foundRow != "notFound":
-                StatusWB.cell(row=foundRow, column=TodayColumn).value = "No/Offline"
+                StatusWB.cell(row=foundRow, column=TodayColumn).value = "no / offline"
                 #StatusWB.cell(row=foundRow, column=cpColumn[cp]).value = "x"
                 TodayFehlerWB.cell(row=todayCbxCounter, column=2).value = 'Gefunden'
             else:
@@ -124,22 +144,26 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
             i = i + 1
 
 
-        todayCbxCounter = 7
+        todayCbxCounter = TodayRow + 1
         my_yellow = styles.colors.Color(rgb='ffff00')
         my_fill = styles.fills.PatternFill(patternType='solid', fgColor=my_yellow)
         no_fill = styles.PatternFill(fill_type=None)
 
-        while StatusWB.cell(row=todayCbxCounter, column=1).value != None:
+
+        while StatusWB.cell(row=todayCbxCounter, column=locationCol).value != None:
             Value = StatusWB.cell(row=todayCbxCounter, column=TodayColumn).value
             ValueM1 = StatusWB.cell(row=todayCbxCounter, column=TodayColumn-1).value
-            if Value == None :
+            if Value == None and StatusWB.cell(row=todayCbxCounter, column=commissionColumn).value == "X":
                 print(todayCbxCounter)
-                StatusWB.cell(row=todayCbxCounter, column=TodayColumn).value = "n"
+                StatusWB.cell(row=todayCbxCounter, column=TodayColumn).value = "yes"
 
             if StatusWB.cell(row=todayCbxCounter, column=TodayColumn).value != ValueM1:
-                StatusWB.cell(row=todayCbxCounter, column=3).fill = my_fill
+                changeVal = pOrN(ValueM1, StatusWB.cell(row=todayCbxCounter, column=TodayColumn).value)
+                StatusWB.cell(row=todayCbxCounter, column=changeCol).value = changeVal
+                StatusWB.cell(row=todayCbxCounter, column=cpmidColumn).fill = my_fill
+                StatusWB.cell(row=todayCbxCounter, column=cpmidColumn).fill = my_fill
             else:
-                StatusWB.cell(row=todayCbxCounter, column=3).fill = no_fill
+                StatusWB.cell(row=todayCbxCounter, column=cpmidColumn).fill = no_fill
             todayCbxCounter = todayCbxCounter + 1
 
     else:
