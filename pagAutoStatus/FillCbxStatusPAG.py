@@ -16,7 +16,8 @@ def createCPlist(xlsxPfad, fehlerCBX):
 def defineFullOrPart(cpidLookup,cpid,cpNo):
     cpid = cpid[:12]
     cpsAmount = cpidLookup.count(cpid)
-
+    if cpNo == None:
+        cpNo = 2
     if cpsAmount < cpNo:
         Status = "No/Part"
         return Status
@@ -68,7 +69,7 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
             foundRow = searchXL(StatusWB, searchTerm, cpmidColumn, "col")[0]
             print("XX ", foundRow)
             if foundRow != "notFound":
-                StatusWB.cell(row=foundRow, column=TodayColumn).value = "offline"
+                StatusWB.cell(row=foundRow, column=TodayColumn).value = "No/Offline"
                 #StatusWB.cell(row=foundRow, column=cpColumn[cp]).value = "x"
                 TodayFehlerWB.cell(row=todayCbxCounter, column=2).value = 'Gefunden'
             else:
@@ -113,12 +114,13 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
             TodayFehlerWB.cell(row=todayCbxCounter, column=3).value = item['chargePointName']
             TodayFehlerWB.cell(row=todayCbxCounter, column=4).value = 'Fehler'
             todayCbxCounter = todayCbxCounter + 1
-
+            wb.save(xlsxPfad)
         i = 1
         while NIBfehlerWB.cell(row=i, column=1).value != None:
             searchTerm = NIBfehlerWB.cell(row=i, column=1).value
             foundRow = searchXL(StatusWB, searchTerm, 1, "col")[0]
-            StatusWB.cell(row=foundRow, column=TodayColumn).value = "j"
+            if foundRow != "notFound":
+                StatusWB.cell(row=foundRow, column=TodayColumn).value = "j"
             i = i + 1
 
 
@@ -164,13 +166,5 @@ if __name__ == "__main__":
         print(element)
 
     WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX)
-    #UserName = os.getlogin()
-    #xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Downloads\\220506_Tracking IBN_KW18_Masterliste_Kopie.xlsx"
 
-    #wb = load_workbook(filename=xlsxPfad)
-    #StatusWB = wb["StatusKurz"]
-    #StatusWB.insert_cols(6, 3) #bevor row 6 insert 3 rows
-    #StatusWB.insert_cols("A")
-    #StatusWB.cell(row=1, column=1).value = "Ist das Durch gegange"
-    #wb.save(xlsxPfad)
     os.startfile(xlsxPfad)
