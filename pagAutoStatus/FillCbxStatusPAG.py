@@ -137,12 +137,12 @@ if __name__ == "__main__":
     #
     # WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX)
     UserName = os.getlogin()
-    xlsxPfad = "C:\\Users\\" + str(UserName) + "\\OneDrive - Dr. Ing. h.c. F. Porsche AG\\Mappe4.xlsx"
+    xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Downloads\\220506_Tracking IBN_KW18_Masterliste_Kopie.xlsx"
 
     wb = load_workbook(filename=xlsxPfad)
-    StatusWB = wb["Tabelle1"]
+    StatusWB = wb["STATUS"]
     #StatusWB.insert_cols(1)
     #StatusWB.insert_cols("A")
     StatusWB.cell(row=1, column=1).fill = "Ist das ne neue Spalte"
     wb.save(xlsxPfad)
-    os.startfile(Mappe3.xlsx)
+    os.startfile(xlsxPfad)
