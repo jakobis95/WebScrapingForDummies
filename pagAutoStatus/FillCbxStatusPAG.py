@@ -158,13 +158,14 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
                 StatusWB.cell(row=todayCbxCounter, column=TodayColumn).value = "yes"
 
             if StatusWB.cell(row=todayCbxCounter, column=TodayColumn).value != ValueM1:
-                changeVal = pOrN(ValueM1, StatusWB.cell(row=todayCbxCounter, column=TodayColumn).value)
-                StatusWB.cell(row=todayCbxCounter, column=changeCol).value = changeVal
                 StatusWB.cell(row=todayCbxCounter, column=cpmidColumn).fill = my_fill
                 StatusWB.cell(row=todayCbxCounter, column=cpmidColumn).fill = my_fill
             else:
                 StatusWB.cell(row=todayCbxCounter, column=cpmidColumn).fill = no_fill
+            changeVal = pOrN(ValueM1, StatusWB.cell(row=todayCbxCounter, column=TodayColumn).value)
+            StatusWB.cell(row=todayCbxCounter, column=changeCol).value = changeVal
             todayCbxCounter = todayCbxCounter + 1
+
 
     else:
         print("Es konnte keine Spalte mit dem heutigen Datum gefunden werden. Prüfen Sie die Excel-datei.")
