@@ -1,6 +1,7 @@
 import json
 import os
 from openpyxl import load_workbook, styles
+from openpyxl.styles import Font, Color
 from A3SupportingGeneralFunctions.NavigateInExcel import searchXL
 from datetime import datetime
 
@@ -41,19 +42,25 @@ def defineFullOrPart(cpidLookup,cpid,cpNo):
 
 
 def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
+    ###Styles
+    my_yellow = styles.colors.Color(rgb='ffff00')
+    my_yellow_letters = Font(color="FF0000")
+    my_fill = styles.fills.PatternFill(patternType='solid', fgColor=my_yellow)
+    no_fill = styles.PatternFill(fill_type=None)
+    ###
     cpidLookup = createCPlist(xlsxPfad, fehlerCBX)
     cp = 0
     wb = load_workbook(filename=xlsxPfad)
     todayCbxCounter = 1
     StatusWB = wb["StatusKurz"]
     TodayFehlerWB = wb["overviewToday"]
-    NIBfehlerWB = wb["NIBfehler"] #NIB steht für "nicht im backend"
+    NIBfehlerWB = wb["NIBfehlerhaft"] #NIB steht für "nicht im backend"
     NIBofflineWB = wb["NIBoffline"]
-    commission = searchXL(StatusWB, "Commissioning finalized")
+    commission = searchXL(StatusWB, 'Commissioning\n finalized')
     commissionColumn = commission[1]
     location = searchXL(StatusWB, "Location")
     locationCol = location[1]
-    change = searchXL(StatusWB, "Veraenderung Vorwoche")
+    change = searchXL(StatusWB, 'Veränderung\n Vorwoche')
     changeCol = change[1]
     LastRow = StatusWB.max_row
     CW = datetime.today().isocalendar()
@@ -121,6 +128,7 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
                 Status = defineFullOrPart(cpidLookup, searchTerm[:12], cpNo)
                 print("Fehlerhafter Standort in Reihe: ", foundRow, "mit Status", Status)
                 StatusWB.cell(row=foundRow, column=TodayColumn).value = str(Status)
+                StatusWB.cell(row=foundRow, column=TodayColumn).font = Font(color="FF0000")
                 #StatusWB.cell(row=foundRow, column=cpColumn[cp]).value = "x"
                 if StatusWB.cell(row=foundRow, column=TodayColumn-1).value != "j":
                     print(item['ErrorMessage'])
@@ -145,14 +153,13 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
 
 
         todayCbxCounter = TodayRow + 1
-        my_yellow = styles.colors.Color(rgb='ffff00')
-        my_fill = styles.fills.PatternFill(patternType='solid', fgColor=my_yellow)
-        no_fill = styles.PatternFill(fill_type=None)
+
 
 
         while StatusWB.cell(row=todayCbxCounter, column=locationCol).value != None:
             Value = StatusWB.cell(row=todayCbxCounter, column=TodayColumn).value
             ValueM1 = StatusWB.cell(row=todayCbxCounter, column=TodayColumn-1).value
+            print("commissionColumn:", str(commissionColumn),"todayCBXCounter", str(todayCbxCounter))
             if Value == None and StatusWB.cell(row=todayCbxCounter, column=commissionColumn).value == "X":
                 print(todayCbxCounter)
                 StatusWB.cell(row=todayCbxCounter, column=TodayColumn).value = "yes"

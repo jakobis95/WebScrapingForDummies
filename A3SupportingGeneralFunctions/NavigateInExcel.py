@@ -44,6 +44,42 @@ def conditional_formatting_with_rules(ws, todayCol):
     ws.conditional_formatting.add(divarea, CellIsRule(operator='greaterThan', formula=['100'], fill=greyFill, font=whiteFont))
     ws.conditional_formatting.add(divarea, CellIsRule(operator='lessThan', formula=['-100'], fill=greyFill, font=whiteFont))
 
+def conditional_formatting_with_rules_CbxStatus(ws, todayCol):
+    #styles
+    greyFill = PatternFill(start_color='D9D9D9', end_color='D9D9D9', fill_type='solid')
+    greenFill = PatternFill(start_color='C6EFCE', end_color='C6EFCE', fill_type='solid')
+    redFill = PatternFill(start_color='FFC7CE', end_color='FFC7CE', fill_type='solid')
+    whiteFont = Font(color='FFFFFF')
+    greenFont = Font(color='006100')
+    redFont = Font(color='9C0006')
+
+
+    first = FormatObject(type='num', val=50)
+    last = FormatObject(type='num', val=65)
+    # colors match the format objects:
+    colors = [Color('00B0F0'), Color('FF0000')]
+    cs2 = ColorScale(cfvo=[first, last], color=colors)
+    # create a rule with the color scale
+    from openpyxl.formatting.rule import Rule
+    rule = Rule(type='colorScale', colorScale=cs2)
+    FirstCellIndex = ws.cell(row=2, column=todayCol).coordinate
+    LastCellIndex = ws.cell(row=ws.max_row, column=todayCol).coordinate
+    print(str(FirstCellIndex) + ':' + str(LastCellIndex))
+    area = str(FirstCellIndex) + ':' + str(LastCellIndex)
+    ws.conditional_formatting.add(area,CellIsRule(operator='greaterThan', formula=['101'], fill=greyFill, font=whiteFont))
+    ws.conditional_formatting.add(area, rule)
+
+
+    #Formatierung differenz zum Vortag
+    FirstCellIndex = ws.cell(row=2, column=todayCol-1).coordinate
+    LastCellIndex = ws.cell(row=ws.max_row, column=todayCol-1).coordinate
+    print(str(FirstCellIndex) + ':' + str(LastCellIndex))
+    divarea = str(FirstCellIndex) + ':' + str(LastCellIndex)
+    ws.conditional_formatting.add(divarea, CellIsRule(operator='between', formula=['1', '99'], fill=redFill, font=redFont))
+    ws.conditional_formatting.add(divarea, CellIsRule(operator='between', formula=['-1', '-99'], fill=greenFill, font=greenFont))
+    ws.conditional_formatting.add(divarea, CellIsRule(operator='greaterThan', formula=['100'], fill=greyFill, font=whiteFont))
+    ws.conditional_formatting.add(divarea, CellIsRule(operator='lessThan', formula=['-100'], fill=greyFill, font=whiteFont))
+
 def searchXL(ws, searchTerm, searchArea = 0, rowcol = "all", begin = 0): # ws=Worksheet, searchTerm, searchArea= specifies the row or column that should be searched, rowcol= if you want to search a row or a column,begin is used to describe from where to start searching in a row or column
     Ycor = "notFound"
     Xcor = "notFound"
