@@ -1,5 +1,6 @@
 from openpyxl import Workbook
 import openpyxl
+import os
 from openpyxl import Workbook
 from datetime import datetime
 from openpyxl.formatting.rule import ColorScale, FormatObject, CellIsRule
@@ -132,9 +133,14 @@ def searchXL(ws, searchTerm, searchArea = 0, rowcol = "all", begin = 0): # ws=Wo
 
 
 if __name__ == "__main__":
-    file = "../CablepressureAnalysis/PythonZuExcel.xlsx"
+    UserName = os.getlogin()
+    file = "C:\\Users\\" + str(UserName) + "\\Downloads\\IBN_SANDbox_Complete.xlsx"
     wb = openpyxl.load_workbook(filename=file)
-    ws = wb.worksheets[0]
+    ws = wb['StatusKurz']
+    activeTicketsCord = searchXL(ws, "active Tickets")
+    activeTicketsColumn = activeTicketsCord[1]
+    activeTicketsRow = activeTicketsCord[0]
+    wbEpicNumber = searchXL(ws, "Epic Ticket Nummer", activeTicketsCord[0], "row")
     TodayCol = ws.max_column
-    conditional_formatting_with_rules(ws, TodayCol)
-    wb.save('PythonZuExcel.xlsx')
+    #conditional_formatting_with_rules(ws, TodayCol)
+    #wb.save(file)

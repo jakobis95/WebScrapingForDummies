@@ -60,7 +60,7 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
     commissionColumn = commission[1]
     location = searchXL(StatusWB, "Location")
     locationCol = location[1]
-    change = searchXL(StatusWB, 'Veränderung\n Vorwoche')
+    change = searchXL(StatusWB, 'Veränderung\nVorwoche')
     changeCol = change[1]
     LastRow = StatusWB.max_row
     CW = datetime.today().isocalendar()
@@ -183,7 +183,7 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
 
 if __name__ == "__main__":
     UserName = os.getlogin()
-    xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Downloads\\IBN_SANDbox.xlsx"
+    xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Downloads\\IBN_SANDbox_Complete.xlsx"
     #xlsxPfadFeedback = "C:\\Users\\" + str(UserName) + "\\Desktop\\TrackingFeedback.xlsx"
 
     f = open("C:/Users/AJ2MSGR/PycharmProjects/WebScrapingForDummies/A2WorkingSkrips/DataFiles/fehlerstandorteStatus.text", 'r')
