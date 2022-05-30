@@ -80,8 +80,14 @@ def conditional_formatting_with_rules_CbxStatus(ws, todayCol):
     ws.conditional_formatting.add(divarea, CellIsRule(operator='between', formula=['-1', '-99'], fill=greenFill, font=greenFont))
     ws.conditional_formatting.add(divarea, CellIsRule(operator='greaterThan', formula=['100'], fill=greyFill, font=whiteFont))
     ws.conditional_formatting.add(divarea, CellIsRule(operator='lessThan', formula=['-100'], fill=greyFill, font=whiteFont))
+"""ws=Worksheet,
+        searchTerm,
+        searchArea= specifies the row or column that should be searched,
+        rowcol= if you want to search a row or a column,
+        begin is used to describe from where to start searching in a row or column
+        """
+def searchXL(ws, searchTerm, searchArea = 0, rowcol = "all", begin = 0, krit = False):
 
-def searchXL(ws, searchTerm, searchArea = 0, rowcol = "all", begin = 0): # ws=Worksheet, searchTerm, searchArea= specifies the row or column that should be searched, rowcol= if you want to search a row or a column,begin is used to describe from where to start searching in a row or column
     Ycor = "notFound"
     Xcor = "notFound"
 
@@ -122,11 +128,12 @@ def searchXL(ws, searchTerm, searchArea = 0, rowcol = "all", begin = 0): # ws=Wo
             if cell.value == searchTerm:
                 Ycor = cell.row
                 Xcor = cell.column
-                #print("Suchbegriff an Coordinate[" + str(cell.row) + "," + str(cell.column) + "] gefunden" )  # change column number for any cell value you want
+                print("Suchbegriff an Coordinate[" + str(cell.row) + "," + str(cell.column) + "] gefunden" )  # change column number for any cell value you want
                 break
 
-    #if Xcor == "notFound":
-        #print("nichts gefunden")
+    if Xcor == "notFound" and krit == True:
+        print(searchTerm, " nichts gefunden")
+        input("Kritischer Suchbegriff konnte nicht gefunden werden. Drücke y zum fortfahren")
 
     return Ycor, Xcor
 
