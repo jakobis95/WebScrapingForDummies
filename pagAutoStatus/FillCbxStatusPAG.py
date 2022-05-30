@@ -70,7 +70,7 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
     cpNoColumn = cpNoCoordinate[1]
     CPMID = searchXL(StatusWB, "CPM ID")  # findet jetzt die heutige Spalte
     cpmidColumn = CPMID[1]
-    TodayCell = searchXL(StatusWB, TodayColumnString) #findet jetzt die heutige Spalte
+    TodayCell = searchXL(StatusWB, TodayColumnString, krit=True) #findet jetzt die heutige Spalte
 
     TodayColumn = TodayCell[1]
     TodayRow = TodayCell[0]
@@ -182,6 +182,8 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
 
 
 if __name__ == "__main__":
+#Todo NIB Standorte eintragen
+#Todo Fehlermeldungen zu Jira Spalte hinzufügen
     UserName = os.getlogin()
     xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Downloads\\IBN_SANDbox_Complete.xlsx"
     #xlsxPfadFeedback = "C:\\Users\\" + str(UserName) + "\\Desktop\\TrackingFeedback.xlsx"

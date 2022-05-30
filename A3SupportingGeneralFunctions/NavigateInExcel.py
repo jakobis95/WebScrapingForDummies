@@ -128,7 +128,8 @@ def searchXL(ws, searchTerm, searchArea = 0, rowcol = "all", begin = 0, krit = F
             if cell.value == searchTerm:
                 Ycor = cell.row
                 Xcor = cell.column
-                print("Suchbegriff an Coordinate[" + str(cell.row) + "," + str(cell.column) + "] gefunden" )  # change column number for any cell value you want
+                if krit == True:
+                    print("Suchbegriff an Coordinate[" + str(cell.row) + "," + str(cell.column) + "] gefunden" )  # change column number for any cell value you want
                 break
 
     if Xcor == "notFound" and krit == True:

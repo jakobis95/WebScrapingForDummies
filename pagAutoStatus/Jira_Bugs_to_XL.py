@@ -63,7 +63,6 @@ def write_Bugs_to_XL(jira_xlsxPfad, xlsxPfad):
         i = i + 1
 
     wb.save(xlsxPfad)
-    wbMaster.save(jira_xlsxPfad)
 if __name__ == "__main__":
     UserName = os.getlogin()
     jira_CSV_Path = "C:\\Users\\" + str(UserName) + "\\Downloads\\CurrentBugs18052022.xlsx"

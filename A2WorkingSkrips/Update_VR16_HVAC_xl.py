@@ -20,7 +20,7 @@ def update_HVAC_Status(jira_Worksheet, destination_Worksheet, index_column, dest
     destination_update_column = coordinates[1]
     coordinates = searchXL(destination_Worksheet, destination_index_column)
     destination_index_column = coordinates[1]
-
+    print(type, "###############################")
     while jira_Worksheet.cell(row=i, column=issue_column).value != None:
         if jira_Worksheet.cell(row=i, column=issue_column).value != "Epic":
             jira_Worksheet.cell(row=i, column=index_column).value = jira_Worksheet.cell(row=i, column=epic_column).value
@@ -29,7 +29,7 @@ def update_HVAC_Status(jira_Worksheet, destination_Worksheet, index_column, dest
     i = 2
     while jira_Worksheet.cell(row=i, column=index_column).value != None:
         index = jira_Worksheet.cell(row=i, column=index_column).value
-        coordinates = searchXL(destination_Worksheet, index, begin=destination_index_column, rowcol="col")
+        coordinates = searchXL(destination_Worksheet, index, begin=destination_index_column, rowcol="col", krit=True)
         index_row = coordinates[0]
         if index_row != "notFound":
             destination_Worksheet.cell(row=index_row, column=destination_update_column).value = "Ja"
@@ -39,8 +39,8 @@ def update_HVAC_Status(jira_Worksheet, destination_Worksheet, index_column, dest
 
 
 
-
 if __name__ == "__main__":
+#Todo Alle leeren Felder mit Nein befüllen
     UserName = os.getlogin()
     jira_xlsx_path_HVAC = "C:\\Users\\" + str(UserName) + "\\Downloads\\HVACOverview.xlsx"
     jira_xlsx_path_VR16 = "C:\\Users\\" + str(UserName) + "\\Downloads\\VR16UpdatedStations.xlsx"
@@ -56,3 +56,4 @@ if __name__ == "__main__":
     update_HVAC_Status(jira_ws_HVAC, status_ws, "Key", "HVAC Maßnahme\numgesetzt (WMQ1)", "Epic Ticket Nummer", "HVAC")
     update_HVAC_Status(jira_ws_VR16, status_ws, "Key", "VR 16 Update\naufgespielt (WMQ2)", "Epic Ticket Nummer", "VR16")
     wb_master.save(master_xlsx_path)
+    os.startfile(master_xlsx_path)
