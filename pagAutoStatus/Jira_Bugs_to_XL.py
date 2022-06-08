@@ -21,7 +21,7 @@ def create_active_issue_String(JiraBugs, i, columnDict):
 
 def write_Bugs_to_XL(jira_xlsxPfad, xlsxPfad):
     wb = load_workbook(filename=xlsxPfad)
-    Status = wb["StatusKurz"]
+    Status = wb["STATUS"]
     wbMaster = load_workbook(filename=jira_xlsxPfad)
     JiraBugs = wbMaster["Sheet1"]
     activeTicketsCord = searchXL(Status, "aktive Tickets und Errors")
@@ -65,6 +65,6 @@ def write_Bugs_to_XL(jira_xlsxPfad, xlsxPfad):
     wb.save(xlsxPfad)
 if __name__ == "__main__":
     UserName = os.getlogin()
-    jira_CSV_Path = "C:\\Users\\" + str(UserName) + "\\Downloads\\CurrentBugs18052022.xlsx"
-    xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Downloads\\IBN_SANDbox_Complete.xlsx"
+    jira_CSV_Path = "C:\\Users\\" + str(UserName) + "\\Downloads\\020622_current_bugs.xlsx"
+    xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Downloads\\Aktuelle_IBN_Kopie_Automationready.xlsx"
     write_Bugs_to_XL(jira_CSV_Path, xlsxPfad)

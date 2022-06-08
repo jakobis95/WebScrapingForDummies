@@ -52,7 +52,7 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
     cp = 0
     wb = load_workbook(filename=xlsxPfad)
     todayCbxCounter = 1
-    StatusWB = wb["StatusKurz"]
+    StatusWB = wb["STATUS"]
     TodayFehlerWB = wb["overviewToday"]
     NIBfehlerWB = wb["NIBfehlerhaft"] #NIB steht für "nicht im backend"
     NIBofflineWB = wb["NIBoffline"]
@@ -74,7 +74,7 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
 
     TodayColumn = TodayCell[1]
     TodayRow = TodayCell[0]
-    StatusWB.cell(row=TodayRow - 1, column=TodayColumn).value = "Heutige Spalte gefunden"
+    #StatusWB.cell(row=TodayRow - 1, column=TodayColumn).value = "Heutige Spalte gefunden"
     #finds Column to display if cp1 and/or cp2 has a problem
     #todo wird nicht gebraucht
     # cp1Column = searchXL(StatusWB, "1")[1]
@@ -94,7 +94,7 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
                 searchTerm = searchTerm[:17] + "1"
 
             foundRow = searchXL(StatusWB, searchTerm, cpmidColumn, "col")[0]
-            print("XX ", foundRow)
+            #print("XX ", foundRow)
             if foundRow != "notFound":
                 StatusWB.cell(row=foundRow, column=TodayColumn).value = "no / offline"
                 #StatusWB.cell(row=foundRow, column=cpColumn[cp]).value = "x"
@@ -177,6 +177,7 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
     else:
         print("Es konnte keine Spalte mit dem heutigen Datum gefunden werden. Prüfen Sie die Excel-datei.")
 
+    #xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Downloads\\Aktuelle_IBN_Kopie2.xlsx"
     wb.save(xlsxPfad)
 
 
@@ -185,7 +186,8 @@ if __name__ == "__main__":
 #Todo NIB Standorte eintragen
 #Todo Fehlermeldungen zu Jira Spalte hinzufügen
     UserName = os.getlogin()
-    xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Downloads\\IBN_SANDbox_Complete.xlsx"
+    xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Downloads\\Aktuelle_IBN_Kopie_Automationready.xlsx"
+
     #xlsxPfadFeedback = "C:\\Users\\" + str(UserName) + "\\Desktop\\TrackingFeedback.xlsx"
 
     f = open("C:/Users/AJ2MSGR/PycharmProjects/WebScrapingForDummies/A2WorkingSkrips/DataFiles/fehlerstandorteStatus.text", 'r')

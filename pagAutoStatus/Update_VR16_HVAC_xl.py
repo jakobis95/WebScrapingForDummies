@@ -29,12 +29,12 @@ def update_HVAC_Status(jira_Worksheet, destination_Worksheet, index_column, dest
     i = 2
     while jira_Worksheet.cell(row=i, column=index_column).value != None:
         index = jira_Worksheet.cell(row=i, column=index_column).value
-        coordinates = searchXL(destination_Worksheet, index, begin=destination_index_column, rowcol="col", krit=True)
+        coordinates = searchXL(destination_Worksheet, index, begin=destination_index_column, rowcol="col")
         index_row = coordinates[0]
         if index_row != "notFound":
             destination_Worksheet.cell(row=index_row, column=destination_update_column).value = "Ja"
         else:
-            print("Index", jira_Worksheet.cell(row=i, column=index_column).value, "Standort: ", jira_Worksheet.cell(row=i, column=summary_column).value)
+            print("Index not found", jira_Worksheet.cell(row=i, column=index_column).value, "Standort: ", jira_Worksheet.cell(row=i, column=summary_column).value)
         i = i + 1
 
 
@@ -43,17 +43,17 @@ if __name__ == "__main__":
 #Todo Alle leeren Felder mit Nein befüllen
     UserName = os.getlogin()
     jira_xlsx_path_HVAC = "C:\\Users\\" + str(UserName) + "\\Downloads\\HVACOverview.xlsx"
-    jira_xlsx_path_VR16 = "C:\\Users\\" + str(UserName) + "\\Downloads\\VR16UpdatedStations.xlsx"
-    master_xlsx_path = "C:\\Users\\" + str(UserName) + "\\Downloads\\IBN_SANDbox_Complete.xlsx"
+    jira_xlsx_path_VR16 = "C:\\Users\\" + str(UserName) + "\\Downloads\\020622_vr16.xlsx"
+    master_xlsx_path = "C:\\Users\\" + str(UserName) + "\\Downloads\\Aktuelle_IBN_Kopie_Automationready.xlsx"
 #Worksheets
     wb_master = load_workbook(filename=master_xlsx_path)
-    status_ws = wb_master["StatusKurz"]
+    status_ws = wb_master["STATUS"]
     wb_jira = load_workbook(filename=jira_xlsx_path_HVAC)
     jira_ws_HVAC = wb_jira["Sheet1"]
     wb_jira = load_workbook(filename=jira_xlsx_path_VR16)
     jira_ws_VR16 = wb_jira["Sheet1"]
 #Skriptaufrufe
     update_HVAC_Status(jira_ws_HVAC, status_ws, "Key", "HVAC Maßnahme\numgesetzt (WMQ1)", "Epic Ticket Nummer", "HVAC")
-    update_HVAC_Status(jira_ws_VR16, status_ws, "Key", "VR 16 Update\naufgespielt (WMQ2)", "Epic Ticket Nummer", "VR16")
+    update_HVAC_Status(jira_ws_VR16, status_ws, "Key", "VR 16 Update \naufgespielt (WMQ2)", "Epic Ticket Nummer", "VR16")
     wb_master.save(master_xlsx_path)
     os.startfile(master_xlsx_path)
