@@ -4,7 +4,7 @@ import openpyxl
 #Bevor dieses Skript gestartet werden kann, muss das in path_dir angezeigte Verzeichnis einmal aufgerufen worden sein
 i = 1
 UserName = os.getlogin()
-keyList = ["KLL_dealerID", "KLL_location","Ort Datum", "KLL_causeError", "KLL_customerComplaint", "KLL_detailedError"]
+keyList = ["KLL_dealerID", "KLL_location","KLL_date", "KLL_causeError", "KLL_customerComplaint", "KLL_detailedError"]
 path_dir = "X:/Proj/V/V0019/E_Mobility_Charging_Solutions/06_IT Systeme/05 Non-Automotive Stammdatenbank/04_DC_Ladehardware/04_Serviceprotokolle"
 path_xlsx = "C:\\Users\\" + str(UserName) + "\\Downloads\\1overviewServiveProtocol.xlsx"
 path_xlsx_save = "C:\\Users\\" + str(UserName) + "\\Downloads\\XXoverviewServiveProtocol.xlsx"

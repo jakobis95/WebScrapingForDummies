@@ -59,9 +59,9 @@ def readServiceProt(Path, keyList):
 
 if __name__ == "__main__":
     UserName = os.getlogin()
-    path = "X:/Proj/V/V0019/E_Mobility_Charging_Solutions/06_IT Systeme/05 Non-Automotive Stammdatenbank/04_DC_Ladehardware/04_Serviceprotokolle/132_Bergamo_20210928/07_04_Annex_I_Service_Report_KLL_Template_en 01-09-2021.pdf"
+    path = "X:/Proj/V/V0019/E_Mobility_Charging_Solutions/06_IT Systeme/05 Non-Automotive Stammdatenbank/04_DC_Ladehardware/04_Serviceprotokolle/132_Bergamo_20210928/Service Report Rostock 23.03.21.pdf"
     #path = "C:\\Users\\" + str(UserName) + "\\Downloads\\TEST_PDF_Lesen.pdf"
-    keyList = ["KLL_dealerID", "KLL_location","Ort Datum", "KLL_causeError", "KLL_customerComplaint", "KLL_detailedError"]
+    keyList = ["KLL_dealerID", "KLL_location","KLL_date", "KLL_causeError", "KLL_customerComplaint", "KLL_detailedError"]
     failedReads = []
     successfulReads = []
     print(readServiceProt(path, keyList))
