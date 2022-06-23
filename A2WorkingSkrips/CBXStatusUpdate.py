@@ -44,17 +44,13 @@ def getCBXdata(CP, atoken, s):
     }
 
     # get mesurements loading control
-    url = ("https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[
-                                                                                   :12] + "_LMS01?lmsGlobalId=00000000000100030" +
-           str(elements['uniqueId'])[17] + "0a")
+    url = ("https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:12] + "_LMS01?lmsGlobalId=00000000000100030" +str(elements['uniqueId'])[17] + "0a")
     print(url)
     CPdata = s.get(url, headers=headers, verify=False)
     CPdataJ = CPdata.json()
 
     # get error message from Chargepoint
-    url = ("https://api.chargepoint-management.com/maintenance/v1/dtcs/" + str(elements['uniqueId'])[
-                                                                           :12] + "_LMS01?lmsGlobalId=00000000000100050" +
-           str(elements['uniqueId'])[17] + "0f")
+    url = ("https://api.chargepoint-management.com/maintenance/v1/dtcs/" + str(elements['uniqueId'])[:12] + "_LMS01?lmsGlobalId=00000000000100050" + str(elements['uniqueId'])[17] + "0f")
     print(url)
     errorData = s.get(url, headers=headers, verify=False)
     errorJ = errorData.json()
@@ -242,6 +238,13 @@ if __name__ == '__main__':
 
     f = open("DataFiles/offlinestandorte.text", 'w')
     f.write(json.dumps(offlinestandorte))
+
+    authLoopRequest(s)
+
+    with open('DataFiles/refreshtoken.txt', 'r') as jsonf:
+        data = json.load(jsonf)
+        print(data['refresh_token'])
+    atoken = 'Bearer ' + data['access_token']
 
     fehlerstandorteStatus = cpstate(fehlerstandorte)
 

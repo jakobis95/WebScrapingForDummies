@@ -44,7 +44,7 @@ if __name__ == "__main__":
     UserName = os.getlogin()
     jira_xlsx_path_HVAC = "C:\\Users\\" + str(UserName) + "\\Downloads\\HVACOverview.xlsx"
     jira_xlsx_path_VR16 = "C:\\Users\\" + str(UserName) + "\\Downloads\\VR16UpdatedStations.xlsx"
-    master_xlsx_path = "C:\\Users\\" + str(UserName) + "\\Downloads\\090622_Tracking_IBN_KW22_Automaxtisiert_Gerlind_only.xlsx"
+    master_xlsx_path = "C:\\Users\\" + str(UserName) + "\\Downloads\\230622_Tracking_IBN_KW25_Auto.xlsx"
 #Worksheets
     wb_master = load_workbook(filename=master_xlsx_path)
     status_ws = wb_master["STATUS"]

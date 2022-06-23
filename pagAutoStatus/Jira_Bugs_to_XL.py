@@ -65,6 +65,6 @@ def write_Bugs_to_XL(jira_xlsxPfad, xlsxPfad):
     wb.save(xlsxPfad)
 if __name__ == "__main__":
     UserName = os.getlogin()
-    jira_CSV_Path = "C:\\Users\\" + str(UserName) + "\\Downloads\\020622_current_bugs.xlsx"
-    xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Downloads\\090622_Tracking_IBN_KW22_Automaxtisiert_Gerlind_only.xlsx"
+    jira_CSV_Path = "C:\\Users\\" + str(UserName) + "\\Downloads\\current_bugs.xlsx"
+    xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Downloads\\230622_Tracking_IBN_KW25_Auto.xlsx"
     write_Bugs_to_XL(jira_CSV_Path, xlsxPfad)
