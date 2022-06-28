@@ -18,6 +18,24 @@ def followXMLPath(parent, path):
         else:
             return result
     return result
+def isChecked(ctrPropsDir, ctrPropXML):
+    print()
+    if ctrPropXML.split("/")[1] != "ctrlProps":
+        print("nicht in Folder controlProps")
+        return False
+    else:
+        path = ctrPropsDir + "\\" + ctrPropXML.split("/")[2]
+        xmldoc = minidom.parse(path)
+        stringlist = xmldoc.getElementsByTagName('formControlPr')
+        stringlist = stringlist[0]
+        print(stringlist.attributes.values)
+        keys = stringlist.attributes.keys()
+        for key in keys:
+            if key == "checked":
+                print(stringlist.attributes["checked"].value)
+                return True
+        else:
+            return False
 
 def relOf(rid, relSheet ):
     xmldoc = minidom.parse(relSheet)
@@ -27,7 +45,8 @@ def relOf(rid, relSheet ):
     for x in stringlist:
         if rid == x.attributes['Id'].value:
             print(x.attributes['Target'].value)
-    return x.attributes['Target'].value
+            return x.attributes['Target'].value
+    return "not found"
 
 def nameOf(shapeId, drawing):
     xmldoc = minidom.parse(drawing)
@@ -45,10 +64,11 @@ def nameOf(shapeId, drawing):
             result = followXMLPath(element, pathToCheckBoxText)
             if result[0]:
                 print(result[1].firstChild.nodeValue)
-
+                return result[1].firstChild.nodeValue
+    return "has no name"
             #print(shapeId, "=", element.firstChild.nodeValue)
 
-def ridOf(sheet, relSheet, drawing):
+def ridOf(sheet, relSheet, drawing, ctrPropsDir):
     xmldoc = minidom.parse(sheet)
     stringlist = xmldoc.getElementsByTagName('control')
     print(len(stringlist))
@@ -57,15 +77,20 @@ def ridOf(sheet, relSheet, drawing):
     for x in stringlist:
         checkBox = [x.attributes['r:id'].value, x.attributes['shapeId'].value, "", "", ""]
         checkBox[2] = relOf(x.attributes['r:id'].value, relSheet)
-        result = nameOf(x.attributes['shapeId'].value, drawing)
-        print(result[1])
+        checkBox[3] = nameOf(x.attributes['shapeId'].value, drawing)
+        checkBox[4] = isChecked(ctrPropsDir, checkBox[2])
+        print(checkBox)
+        checkBoxList.append(checkBox)
+    for checkBox in checkBoxList:
+        if checkBox[3] != "has no name":
+            print(checkBox)
 
 if __name__ == "__main__":
     UserName = os.getlogin()
 
     drawing = "C:\\Users\\AJ2MSGR\\Documents\\swindon cbx commissioning\\xl\drawings\\drawing1.xml"
     sheet = "C:\\Users\\AJ2MSGR\\Documents\\swindon cbx commissioning\\xl\\worksheets\\sheet1.xml"
-    ctrPropsDir = "C:\\Users\\AJ2MSGR\\Documents\\swindon cbx commissioning\\xl\\ctrProps"
+    ctrPropsDir = "C:\\Users\\AJ2MSGR\\Documents\\swindon cbx commissioning\\xl\\ctrlProps"
     relSheet = "C:\\Users\\AJ2MSGR\\Documents\\swindon cbx commissioning\\xl\\worksheets\\_rels\\sheet1.xml.rels"
     #xlsxPfad = "C:/Users/AJ2MSGR/OneDrivea - Dr.Ing.h.c.F.Porsche AG/IBN_Kastenfinden.xlsm"
-    ridOf(sheet, relSheet, drawing)
+    ridOf(sheet, relSheet, drawing, ctrPropsDir)
