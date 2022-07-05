@@ -5,7 +5,7 @@ from openpyxl.styles import Font, Color
 from A3SupportingGeneralFunctions.NavigateInExcel import searchXL
 from datetime import datetime
 def updateChangeFormula(coordinateM1, coordinateToday):
-    return '=IF(MID('+ str(coordinateToday) +',1,2)=MID('+ str(coordinateM1) +',1,2),"",IF(AND('+ str(coordinateToday) +'="yes",'+ str(coordinateM1) +'<>"yes"),"B",IF(AND('+ str(coordinateToday) +'<>"",'+ str(coordinateToday) +'<>"yes"),"S","")))'
+    return '=IF(MID('+ str(coordinateToday) +',1,2)=MID('+ str(coordinateM1) +',1,2),"",IF(AND('+ str(coordinateToday) +'="yes",'+ str(coordinateM1) +'<>"yes"),"better",IF(AND('+ str(coordinateToday) +'<>"",'+ str(coordinateToday) +'<>"yes"),"worse","")))'
 
 
 def pOrN(StatusLastWeek, StatusThisWeek):
