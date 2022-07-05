@@ -4,6 +4,9 @@ from openpyxl import load_workbook, styles
 from openpyxl.styles import Font, Color
 from A3SupportingGeneralFunctions.NavigateInExcel import searchXL
 from datetime import datetime
+def updateChangeFormula(coordinateM1, coordinateToday):
+    return '=IF(MID('+ str(coordinateToday) +',1,2)=MID('+ str(coordinateM1) +',1,2),"",IF(AND('+ str(coordinateToday) +'="yes",'+ str(coordinateM1) +'<>"yes"),"B",IF(AND('+ str(coordinateToday) +'<>"",'+ str(coordinateToday) +'<>"yes"),"S","")))'
+
 
 def pOrN(StatusLastWeek, StatusThisWeek):
     if StatusThisWeek == None:
@@ -28,6 +31,7 @@ def createCPlist(xlsxPfad, fehlerCBX):
         print(CPID)
         cpidLookup.append(CPID)
     return cpidLookup
+
 def defineFullOrPart(cpidLookup,cpid,cpNo):
     cpid = cpid[:12]
     cpsAmount = cpidLookup.count(cpid)
@@ -54,8 +58,8 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
     todayCbxCounter = 1
     StatusWB = wb["STATUS"]
     TodayFehlerWB = wb["overviewToday"]
-    NIBfehlerWB = wb["NIBfehlerhaft"] #NIB steht für "nicht im backend"
-    NIBofflineWB = wb["NIBoffline"]
+    #NIBfehlerWB = wb["NIBfehlerhaft"] #NIB steht für "nicht im backend"
+    #NIBofflineWB = wb["NIBoffline"]
     commission = searchXL(StatusWB, 'Commissioning\n finalized')
     commissionColumn = commission[1]
     location = searchXL(StatusWB, "Location")
@@ -144,12 +148,12 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
             todayCbxCounter = todayCbxCounter + 1
             wb.save(xlsxPfad)
         i = 1
-        while NIBfehlerWB.cell(row=i, column=1).value != None:
-            searchTerm = NIBfehlerWB.cell(row=i, column=1).value
-            foundRow = searchXL(StatusWB, searchTerm, 1, "col")[0]
-            if foundRow != "notFound":
-                StatusWB.cell(row=foundRow, column=TodayColumn).value = "j"
-            i = i + 1
+        # while NIBfehlerWB.cell(row=i, column=1).value != None:
+        #     searchTerm = NIBfehlerWB.cell(row=i, column=1).value
+        #     foundRow = searchXL(StatusWB, searchTerm, 1, "col")[0]
+        #     if foundRow != "notFound":
+        #         StatusWB.cell(row=foundRow, column=TodayColumn).value = "j"
+        #     i = i + 1
 
 
         todayCbxCounter = TodayRow + 1
@@ -169,7 +173,7 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
                 StatusWB.cell(row=todayCbxCounter, column=cpmidColumn).fill = my_fill
             else:
                 StatusWB.cell(row=todayCbxCounter, column=cpmidColumn).fill = no_fill
-            changeVal = pOrN(ValueM1, StatusWB.cell(row=todayCbxCounter, column=TodayColumn).value)
+            changeVal = updateChangeFormula(StatusWB.cell(row=todayCbxCounter, column=TodayColumn-1).coordinate, StatusWB.cell(row=todayCbxCounter, column=TodayColumn).coordinate)
             StatusWB.cell(row=todayCbxCounter, column=changeCol).value = changeVal
             todayCbxCounter = todayCbxCounter + 1
 
@@ -186,7 +190,7 @@ if __name__ == "__main__":
 #Todo NIB Standorte eintragen
 #Todo Fehlermeldungen zu Jira Spalte hinzufügen
     UserName = os.getlogin()
-    xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Downloads\\230622_Tracking_IBN_KW25_Auto.xlsx"
+    xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Downloads\\300622_Tracking_IBN_KW26 - Kopie - Kopie.xlsx"
 
     #xlsxPfadFeedback = "C:\\Users\\" + str(UserName) + "\\Desktop\\TrackingFeedback.xlsx"
 
