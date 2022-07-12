@@ -190,7 +190,7 @@ if __name__ == "__main__":
 #Todo NIB Standorte eintragen
 #Todo Fehlermeldungen zu Jira Spalte hinzufügen
     UserName = os.getlogin()
-    xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Downloads\\300622_Tracking_IBN_KW26 - Kopie - Kopie.xlsx"
+    xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Downloads\\IBN_Tracking.xlsx"
 
     #xlsxPfadFeedback = "C:\\Users\\" + str(UserName) + "\\Desktop\\TrackingFeedback.xlsx"
 

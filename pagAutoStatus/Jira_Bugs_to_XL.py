@@ -27,7 +27,7 @@ def write_Bugs_to_XL(jira_xlsxPfad, xlsxPfad):
     activeTicketsCord = searchXL(Status, "aktive Tickets und Errors")
     activeTicketsColumn = activeTicketsCord[1]
     activeTicketsRow = activeTicketsCord[0]
-    wbEpicNumber = searchXL(Status,"Epic Ticket Nummer", activeTicketsCord[0],"row")
+    wbEpicNumber = searchXL(Status,"Jira Epic", activeTicketsCord[0],"row")
     wbEpicNumberCol = wbEpicNumber[1]
     print("activeTicket Col", activeTicketsColumn)
     EpicLink = searchXL(JiraBugs, "Epic Link")
@@ -66,5 +66,5 @@ def write_Bugs_to_XL(jira_xlsxPfad, xlsxPfad):
 if __name__ == "__main__":
     UserName = os.getlogin()
     jira_CSV_Path = "C:\\Users\\" + str(UserName) + "\\Downloads\\current_bugs.xlsx"
-    xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Downloads\\230622_Tracking_IBN_KW25_Auto.xlsx"
+    xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Downloads\\IBN_Tracking.xlsx"
     write_Bugs_to_XL(jira_CSV_Path, xlsxPfad)

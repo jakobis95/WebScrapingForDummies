@@ -44,7 +44,7 @@ if __name__ == "__main__":
     UserName = os.getlogin()
     jira_xlsx_path_HVAC = "C:\\Users\\" + str(UserName) + "\\Downloads\\HVACOverview.xlsx"
     jira_xlsx_path_VR16 = "C:\\Users\\" + str(UserName) + "\\Downloads\\VR16UpdatedStations.xlsx"
-    master_xlsx_path = "C:\\Users\\" + str(UserName) + "\\Downloads\\230622_Tracking_IBN_KW25_Auto.xlsx"
+    master_xlsx_path = "C:\\Users\\" + str(UserName) + "\\Downloads\\IBN_Tracking.xlsx"
 #Worksheets
     wb_master = load_workbook(filename=master_xlsx_path)
     status_ws = wb_master["STATUS"]
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     wb_jira = load_workbook(filename=jira_xlsx_path_VR16)
     jira_ws_VR16 = wb_jira["Sheet1"]
 #Skriptaufrufe
-    update_HVAC_Status(jira_ws_HVAC, status_ws, "Key", "HVAC Maßnahme\numgesetzt (WMQ1)", "Epic Ticket Nummer", "HVAC")
-    update_HVAC_Status(jira_ws_VR16, status_ws, "Key", "VR 16 Update \naufgespielt (WMQ2)", "Epic Ticket Nummer", "VR16")
+    update_HVAC_Status(jira_ws_HVAC, status_ws, "Key", "HVAC action (WMQ1)", "Jira Epic", "HVAC")
+    update_HVAC_Status(jira_ws_VR16, status_ws, "Key", "VR 16 Update (WMQ2)", "Jira Epic", "VR16")
     wb_master.save(master_xlsx_path)
     os.startfile(master_xlsx_path)
