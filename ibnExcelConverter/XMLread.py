@@ -10,14 +10,17 @@ def findChild(parent, childLocalName):
     return False, child
 
 def followXMLPath(parent, path):
-    for localName in path:
-        print(localName)
-        result = findChild(parent, localName)
-        if result[0] == True:
-            parent = result[1]
-        else:
-            return result
-    return result
+    if path != None:
+        for localName in path:
+            print(localName)
+            result = findChild(parent, localName)
+            if result[0] == True:
+                parent = result[1]
+            else:
+                return result[0], parent
+        return result
+    else:
+        return "error", parent
 def isChecked(ctrPropsDir, ctrPropXML):
     print()
     if ctrPropXML.split("/")[1] != "ctrlProps":
