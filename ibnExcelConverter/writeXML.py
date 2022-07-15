@@ -1,6 +1,6 @@
 from openpyxl import load_workbook, styles
 from xml.dom import minidom
-from XMLread import followXMLPath
+from XMLread import followXMLPath, ridOf
 import os
 from readXlIbn import returnPDFdata,takeRow
 def getBatteryIdentList(ibnData):
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     old = ws.cell(row=i, column=1).value
     nodeId = 1
     batteryIdentList = getBatteryIdentList(ibnData)
-    for i in range(2, 25, 1):
+    for i in range(2, 29, 1):
         new = ws.cell(row=i, column=1).value
         if new != old:
             nodeId = nodeId + 2
@@ -61,6 +61,18 @@ if __name__ == "__main__":
                     batteryIdent.appendChild(nodeText)
                     batteryId = batteryId + 1
             #xmldoc.writexml(open('data.xml', 'w'), indent="  ", addindent="  ", newl='\n')
+        # elif new == "POWER_SUPPLY":
+        #     drawing = "C:\\Users\\AJ2MSGR\\Documents\\swindon cbx commissioning\\xl\drawings\\drawing1.xml"
+        #     sheet = "C:\\Users\\AJ2MSGR\\Documents\\swindon cbx commissioning\\xl\\worksheets\\sheet1.xml"
+        #     ctrPropsDir = "C:\\Users\\AJ2MSGR\\Documents\\swindon cbx commissioning\\xl\\ctrlProps"
+        #     relSheet = "C:\\Users\\AJ2MSGR\\Documents\\swindon cbx commissioning\\xl\\worksheets\\_rels\\sheet1.xml.rels"
+        #     path = createList(ws.cell(row=i, column=3).value)
+        #     print("path", path)
+        #     node = followXMLPath(itemNode.childNodes[nodeId], path)
+        #     nodeData = node[1].firstChild
+        #     print(node[1].localName, ibnData[int(ws.cell(row=i, column=5).value)][int(ws.cell(row=i, column=6).value)])
+        #     nodeText = xmldoc.createTextNode(str(ridOf(sheet, relSheet, drawing, ctrPropsDir)))
+        #     node[1].appendChild(nodeText)
         else:
             path = createList(ws.cell(row=i, column=3).value)
             print("path", path)
@@ -69,6 +81,5 @@ if __name__ == "__main__":
             print(node[1].localName, ibnData[int(ws.cell(row=i, column=5).value)][int(ws.cell(row=i, column=6).value)])
             nodeText = xmldoc.createTextNode(str(ibnData[int(ws.cell(row=i, column=5).value)][int(ws.cell(row=i, column=6).value)]))
             node[1].appendChild(nodeText)
-            #xmldoc.writexml(open('data.xml', 'w'),indent="  ",addindent="  ",newl='\n')
         old = ws.cell(row=i, column=1).value
     xmldoc.writexml(open('data.xml', 'w'), indent="  ", addindent="  ", newl='\n')
