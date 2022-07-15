@@ -70,8 +70,16 @@ def nameOf(shapeId, drawing):
                 return result[1].firstChild.nodeValue
     return "has no name"
             #print(shapeId, "=", element.firstChild.nodeValue)
+def giveGridPower(string):
+        return string.split()[0]
 
 def ridOf(sheet, relSheet, drawing, ctrPropsDir):
+    switchCase = {
+        "50 kVA" : giveGridPower,
+        "86 kVA" : giveGridPower,
+        "110 kVA" : giveGridPower,
+
+    }
     xmldoc = minidom.parse(sheet)
     stringlist = xmldoc.getElementsByTagName('control')
     print(len(stringlist))
@@ -82,11 +90,16 @@ def ridOf(sheet, relSheet, drawing, ctrPropsDir):
         checkBox[2] = relOf(x.attributes['r:id'].value, relSheet)
         checkBox[3] = nameOf(x.attributes['shapeId'].value, drawing)
         checkBox[4] = isChecked(ctrPropsDir, checkBox[2])
-        print(checkBox)
+        #print(checkBox)
         checkBoxList.append(checkBox)
     for checkBox in checkBoxList:
         if checkBox[3] != "has no name":
             print(checkBox)
+            if checkBox[4] == True:
+                if checkBox[3] == "50 kVA" or checkBox[3] == "86 kVA" or checkBox[3] == "110 kVA":
+                    print("Grid Power =", checkBox[3])
+                    return giveGridPower(checkBox[3])
+
 
 if __name__ == "__main__":
     UserName = os.getlogin()
