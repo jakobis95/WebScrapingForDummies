@@ -9,5 +9,5 @@ def is_XML_correct(xml_schema, xml):
 
 if __name__ == "__main__":
     my_schema = "C:\\Users\\AJ2MSGR\\Documents\\ZSB_PCB - Kopie.xsd"
-    my_xml = "C:\\Users\\AJ2MSGR\\Documents\\ads-tec_ZSBPCB_20210923_TEMPLATE - Kopie.xml"
+    my_xml = "data.xml"
     is_XML_correct(my_schema, my_xml)
