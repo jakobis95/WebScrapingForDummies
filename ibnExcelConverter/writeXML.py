@@ -43,7 +43,7 @@ if __name__ == "__main__":
     old = ws.cell(row=i, column=1).value
     nodeId = 1
     batteryIdentList = getBatteryIdentList(ibnData)
-    for i in range(2, 29, 1):
+    for i in range(2, 28, 1):
         new = ws.cell(row=i, column=1).value
         if new != old:
             nodeId = nodeId + 2
@@ -52,27 +52,34 @@ if __name__ == "__main__":
             batteryId = 0
             batterys = itemNode.childNodes[nodeId]
             for battery in batterys.childNodes:
+                fullType = 0
                 print(battery.localName)
                 if str(battery.localName) == "BATTERY" :
                     print("BatteryID:",batteryId, "Serienummer", batteryIdentList[batteryId])
                     path = ["IDENT"]
                     batteryIdent = followXMLPath(battery,path)[1]
-                    nodeText = xmldoc.createTextNode(batteryIdentList[2])
+                    nodeText = xmldoc.createTextNode(batteryIdentList[batteryId])
                     batteryIdent.appendChild(nodeText)
                     batteryId = batteryId + 1
+                elif str(battery.localName) == "TYPE":
+                    print(battery.localName,ibnData[int(ws.cell(row=i, column=5).value)][int(ws.cell(row=i, column=6).value)])
+                    nodeText = xmldoc.createTextNode(str(ibnData[int(ws.cell(row=i, column=5).value)][int(ws.cell(row=i, column=6).value)]).upper())
+                    battery.appendChild(nodeText)
+
+
             #xmldoc.writexml(open('data.xml', 'w'), indent="  ", addindent="  ", newl='\n')
-        # elif new == "POWER_SUPPLY":
-        #     drawing = "C:\\Users\\AJ2MSGR\\Documents\\swindon cbx commissioning\\xl\drawings\\drawing1.xml"
-        #     sheet = "C:\\Users\\AJ2MSGR\\Documents\\swindon cbx commissioning\\xl\\worksheets\\sheet1.xml"
-        #     ctrPropsDir = "C:\\Users\\AJ2MSGR\\Documents\\swindon cbx commissioning\\xl\\ctrlProps"
-        #     relSheet = "C:\\Users\\AJ2MSGR\\Documents\\swindon cbx commissioning\\xl\\worksheets\\_rels\\sheet1.xml.rels"
-        #     path = createList(ws.cell(row=i, column=3).value)
-        #     print("path", path)
-        #     node = followXMLPath(itemNode.childNodes[nodeId], path)
-        #     nodeData = node[1].firstChild
-        #     print(node[1].localName, ibnData[int(ws.cell(row=i, column=5).value)][int(ws.cell(row=i, column=6).value)])
-        #     nodeText = xmldoc.createTextNode(str(ridOf(sheet, relSheet, drawing, ctrPropsDir)))
-        #     node[1].appendChild(nodeText)
+        elif new == "POWER_SUPPLY":
+            drawing = "C:\\Users\\AJ2MSGR\\Documents\\swindon cbx commissioning\\xl\drawings\\drawing1.xml"
+            sheet = "C:\\Users\\AJ2MSGR\\Documents\\swindon cbx commissioning\\xl\\worksheets\\sheet1.xml"
+            ctrPropsDir = "C:\\Users\\AJ2MSGR\\Documents\\swindon cbx commissioning\\xl\\ctrlProps"
+            relSheet = "C:\\Users\\AJ2MSGR\\Documents\\swindon cbx commissioning\\xl\\worksheets\\_rels\\sheet1.xml.rels"
+            path = createList(ws.cell(row=i, column=3).value)
+            print("path", path)
+            node = followXMLPath(itemNode.childNodes[nodeId], path)
+            nodeData = node[1].firstChild
+            print(node[1].localName, ibnData[int(ws.cell(row=i, column=5).value)][int(ws.cell(row=i, column=6).value)])
+            nodeText = xmldoc.createTextNode(str(ridOf(sheet, relSheet, drawing, ctrPropsDir)))
+            node[1].appendChild(nodeText)
         else:
             path = createList(ws.cell(row=i, column=3).value)
             print("path", path)

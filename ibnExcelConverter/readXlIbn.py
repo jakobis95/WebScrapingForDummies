@@ -1,5 +1,6 @@
 from openpyxl import load_workbook, styles
 import os
+import datetime
 def takeRow(elem):
     return elem[1]
 
@@ -17,7 +18,11 @@ def returnPDFdata(xlsxPfad):
         for column in range(1, maxCol, 1):
             if IBN_S.cell(row=row, column=column).value:
                 No = No + 1
-                cell = IBN_S.cell(row=row, column=column).value
+                if isinstance(IBN_S.cell(row=row, column=column).value, datetime.datetime):
+                    cell = IBN_S.cell(row=row, column=column).value
+                    cell = cell.date()
+                else:
+                    cell = IBN_S.cell(row=row, column=column).value
                 dataColumn.append(cell)
         dataRows.append(dataColumn)
     i = 0;
