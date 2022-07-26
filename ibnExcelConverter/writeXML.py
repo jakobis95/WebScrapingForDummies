@@ -3,6 +3,7 @@ from xml.dom import minidom
 from XMLread import followXMLPath, ridOf
 import os
 from readXlIbn import returnPDFdata,takeRow
+
 def getBatteryIdentList(ibnData):
     batteryIdentList = []
     for row in range(63, 70, 2):
@@ -23,7 +24,7 @@ def createList(string):
 
 if __name__ == "__main__":
     UserName = os.getlogin()
-    xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Documents\\teesside cbx commissioning.xlsm"
+    xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Documents\\Commissioning Report - PC East-Flanders - 20220718.xlsm"
     ibnData = returnPDFdata(xlsxPfad)
 
 
@@ -67,12 +68,12 @@ if __name__ == "__main__":
                     battery.appendChild(nodeText)
 
 
-            #xmldoc.writexml(open('data.xml', 'w'), indent="  ", addindent="  ", newl='\n')
+            #xmldoc.writexml(open('East_Flanders_IBN.xml', 'w'), indent="  ", addindent="  ", newl='\n')
         elif new == "POWER_SUPPLY":
-            drawing = "C:\\Users\\AJ2MSGR\\Documents\\swindon cbx commissioning\\xl\drawings\\drawing1.xml"
-            sheet = "C:\\Users\\AJ2MSGR\\Documents\\swindon cbx commissioning\\xl\\worksheets\\sheet1.xml"
-            ctrPropsDir = "C:\\Users\\AJ2MSGR\\Documents\\swindon cbx commissioning\\xl\\ctrlProps"
-            relSheet = "C:\\Users\\AJ2MSGR\\Documents\\swindon cbx commissioning\\xl\\worksheets\\_rels\\sheet1.xml.rels"
+            drawing = "C:\\Users\\AJ2MSGR\\Documents\\Commissioning Report - PC East-Flanders - 20220718\\xl\drawings\\drawing1.xml"
+            sheet = "C:\\Users\\AJ2MSGR\\Documents\\Commissioning Report - PC East-Flanders - 20220718\\xl\\worksheets\\sheet1.xml"
+            ctrPropsDir = "C:\\Users\\AJ2MSGR\\Documents\\Commissioning Report - PC East-Flanders - 20220718\\xl\\ctrlProps"
+            relSheet = "C:\\Users\\AJ2MSGR\\Documents\\Commissioning Report - PC East-Flanders - 20220718\\xl\\worksheets\\_rels\\sheet1.xml.rels"
             path = createList(ws.cell(row=i, column=3).value)
             print("path", path)
             node = followXMLPath(itemNode.childNodes[nodeId], path)
@@ -89,4 +90,4 @@ if __name__ == "__main__":
             nodeText = xmldoc.createTextNode(str(ibnData[int(ws.cell(row=i, column=5).value)][int(ws.cell(row=i, column=6).value)]))
             node[1].appendChild(nodeText)
         old = ws.cell(row=i, column=1).value
-    xmldoc.writexml(open('data.xml', 'w'), indent="  ", addindent="  ", newl='\n')
+    xmldoc.writexml(open('East_Flanders_IBN.xml', 'w'), indent="  ", addindent="  ", newl='\n')

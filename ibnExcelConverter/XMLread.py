@@ -104,9 +104,9 @@ def ridOf(sheet, relSheet, drawing, ctrPropsDir):
 if __name__ == "__main__":
     UserName = os.getlogin()
 
-    drawing = "C:\\Users\\AJ2MSGR\\Documents\\swindon cbx commissioning\\xl\drawings\\drawing1.xml"
-    sheet = "C:\\Users\\AJ2MSGR\\Documents\\swindon cbx commissioning\\xl\\worksheets\\sheet1.xml"
-    ctrPropsDir = "C:\\Users\\AJ2MSGR\\Documents\\swindon cbx commissioning\\xl\\ctrlProps"
-    relSheet = "C:\\Users\\AJ2MSGR\\Documents\\swindon cbx commissioning\\xl\\worksheets\\_rels\\sheet1.xml.rels"
+    drawing = "C:\\Users\\AJ2MSGR\\Documents\\Commissioning Report - PC East-Flanders - 20220718\\xl\drawings\\drawing1.xml"
+    sheet = "C:\\Users\\AJ2MSGR\\Documents\\Commissioning Report - PC East-Flanders - 20220718\\xl\\worksheets\\sheet1.xml"
+    ctrPropsDir = "C:\\Users\\AJ2MSGR\\Documents\\Commissioning Report - PC East-Flanders - 20220718\\xl\\ctrlProps"
+    relSheet = "C:\\Users\\AJ2MSGR\\Documents\\Commissioning Report - PC East-Flanders - 20220718\\xl\\worksheets\\_rels\\sheet1.xml.rels"
     #xlsxPfad = "C:/Users/AJ2MSGR/OneDrivea - Dr.Ing.h.c.F.Porsche AG/IBN_Kastenfinden.xlsm"
     ridOf(sheet, relSheet, drawing, ctrPropsDir)
