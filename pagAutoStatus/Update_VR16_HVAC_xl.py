@@ -10,7 +10,6 @@ from datetime import datetime
 import pandas as pd
 def update_HVAC_Status(jira_Worksheet, destination_Worksheet, index_column, destination_update_column, destination_index_column, type):
     i = 1
-
     coordinates = searchXL(jira_Worksheet, index_column, begin=1, rowcol="row", krit=True)
     index_column = coordinates[1]
     coordinates = searchXL(jira_Worksheet, "Summary", begin=1, rowcol="row")
