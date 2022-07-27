@@ -5,17 +5,33 @@ import sqlite3
 import json
 import os
 import requests
+import A3SupportingGeneralFunctions.FileManagementTools as fileMan
 from pagAutoStatus.FillCbxStatusPAG import WriteStatusToXL
 from pagAutoStatus.Jira_Bugs_to_XL import write_Bugs_to_XL
 from pagAutoStatus.Update_VR16_HVAC_xl import start_Update_from_Jira
 from A2WorkingSkrips.CBXStatusUpdate import BackendRequestTemplate,cpstate,authLoopRequest,get_error_msg
 
-def get_File_property():
-    from pathlib import *
-    p = Path("C:\\Users\\" + str(UserName) + "\\Downloads\\HVACOverview.xlsx")
-    pct = p.stat().st_mtime
-    from datetime import datetime
-    print(datetime.utcfromtimestamp(pct).strftime('%Y-%m-%d %H:%M:%S'))
+def check_files_timeliness(files):
+    uptodate = True
+    for file in files:
+        if fileMan.is_uptodate(file):
+            print("uptodate\n ->>", file)
+        else:
+            print("NOT UPTODATE\n ->>", file)
+            uptodate = False
+    if uptodate == False:
+        print("Outdated File detected!!!, you want to continue?")
+        decision = False
+        while decision != True:
+            response = input("Press y to continue or n to terminate programm")
+            if response == "y":
+                decision = True
+                return True
+            if response == "n":
+                decision = True
+                return False
+    else:
+        return True
 
 if __name__ == "__main__":
 
@@ -26,6 +42,9 @@ if __name__ == "__main__":
     master_xlsx_path = "C:\\Users\\" + str(UserName) + "\\Downloads\\IBN_Tracking.xlsx"
     jira_CSV_Path = "C:\\Users\\" + str(UserName) + "\\Downloads\\current_bugs.xlsx"
 
+    files = [jira_xlsx_path_VR16, jira_xlsx_path_HVAC, jira_CSV_Path]
+    if check_files_timeliness(files) != True:
+        exit()
 #CBXStatusUpdate
     i = 0
     urllist = ["https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=FAULTED",

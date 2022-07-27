@@ -39,7 +39,19 @@ def update_HVAC_Status(jira_Worksheet, destination_Worksheet, index_column, dest
         else:
             print("Index not found", jira_Worksheet.cell(row=i, column=index_column).value, "Standort: ", jira_Worksheet.cell(row=i, column=summary_column).value)
         i = i + 1
-
+def start_Update_from_Jira(jira_xlsx_path_HVAC, jira_xlsx_path_VR16, master_xlsx_path):
+    # Worksheets
+    wb_master = load_workbook(filename=master_xlsx_path)
+    status_ws = wb_master["STATUS"]
+    wb_jira = load_workbook(filename=jira_xlsx_path_HVAC)
+    jira_ws_HVAC = wb_jira["Sheet1"]
+    wb_jira = load_workbook(filename=jira_xlsx_path_VR16)
+    jira_ws_VR16 = wb_jira["Sheet1"]
+    # Skriptaufrufe
+    update_HVAC_Status(jira_ws_HVAC, status_ws, "Key", "HVAC action (WMQ1)", "Jira Epic", "HVAC")
+    update_HVAC_Status(jira_ws_VR16, status_ws, "Key", "VR 16 Update (WMQ2)", "Jira Epic", "VR16")
+    wb_master.save(master_xlsx_path)
+    os.startfile(master_xlsx_path)
 
 
 if __name__ == "__main__":
