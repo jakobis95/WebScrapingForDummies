@@ -4,6 +4,7 @@ from openpyxl import load_workbook, styles
 from openpyxl.styles import Font, Color
 from A3SupportingGeneralFunctions.NavigateInExcel import searchXL
 from datetime import datetime
+
 def updateChangeFormula(coordinateM1, coordinateToday):
     return '=IF(MID('+ str(coordinateToday) +',1,2)=MID('+ str(coordinateM1) +',1,2),"",IF(AND('+ str(coordinateToday) +'="yes",'+ str(coordinateM1) +'<>"yes"),"better",IF(AND('+ str(coordinateToday) +'<>"",'+ str(coordinateToday) +'<>"yes"),"worse","")))'
 
@@ -64,7 +65,7 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
     commissionColumn = commission[1]
     location = searchXL(StatusWB, "Location")
     locationCol = location[1]
-    change = searchXL(StatusWB, 'Veränderung\nVorwoche')
+    change = searchXL(StatusWB, 'Veränderung\nVorwoche') #todo sprache ändern auch in der XL
     changeCol = change[1]
     LastRow = StatusWB.max_row
     CW = datetime.today().isocalendar()
@@ -72,14 +73,12 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
     #finds Column with the date of today
     cpNoCoordinate = searchXL(StatusWB, "hardware_prim_dc_no_chargers")
     cpNoColumn = cpNoCoordinate[1]
-    CPMID = searchXL(StatusWB, "CPM ID")  # findet jetzt die heutige Spalte
+    CPMID = searchXL(StatusWB, "CPM ID")
     cpmidColumn = CPMID[1]
     TodayCell = searchXL(StatusWB, TodayColumnString, krit=True) #findet jetzt die heutige Spalte
 
     TodayColumn = TodayCell[1]
     TodayRow = TodayCell[0]
-    #StatusWB.cell(row=TodayRow - 1, column=TodayColumn).value = "Heutige Spalte gefunden"
-    #finds Column to display if cp1 and/or cp2 has a problem
     #todo wird nicht gebraucht
     # cp1Column = searchXL(StatusWB, "1")[1]
     # cp2Column = searchXL(StatusWB, "2")[1]
@@ -187,8 +186,6 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
 
 
 if __name__ == "__main__":
-#Todo NIB Standorte eintragen
-#Todo Fehlermeldungen zu Jira Spalte hinzufügen
     UserName = os.getlogin()
     xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Downloads\\IBN_Tracking.xlsx"
 
