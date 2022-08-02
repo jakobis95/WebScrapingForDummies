@@ -58,7 +58,7 @@ def getCBXdata(CP, atoken, s):
     print(errorJ)
 
     return CPdataJ, errorJ, errorStr
-def cpstate(fehlerstandorte):
+def cpstate(fehlerstandorte, atoken):
     StatusListe = []
 
     for elements in fehlerstandorte:
@@ -134,10 +134,11 @@ def BackendRequestTemplate(atoken, url, s, i):
 
 def refreshT(s): # Hier wird der Token refreshed
     #die verwendete Json datei wird aus dem Browser kopiert
-    with open('DataFiles/refreshtoken.txt', 'r') as jsonf:
+    tokenPath = 'C:/Users/AJ2MSGR/PycharmProjects/WebScrapingForDummies/A2WorkingSkrips/DataFiles/refreshtoken.txt'
+    with open(tokenPath, 'r') as jsonf:
         data = json.load(jsonf)
         print(data['refresh_token'])
-
+    #C:\Users\AJ2MSGR\PycharmProjects\WebScrapingForDummies\A2WorkingSkrips\DataFiles
 
     url = 'https://login.chargepoint-management.com/auth/realms/PAG/protocol/openid-connect/token'
     headers = {
@@ -159,18 +160,18 @@ def refreshT(s): # Hier wird der Token refreshed
 
     p = s.post(url, headers=headers, verify=False, data = payload )
     print(p)
-    with open('DataFiles/refreshtoken.txt', 'w') as f:
+    with open(tokenPath, 'w') as f:
         f.write(p.text)
     return p
 
-def authLoopRequest(s):
+def authLoopRequest(s, tokenPath):
     p = 999
     p = refreshT(s)
     while p.status_code != 200:
         if p.status_code != 200:
             print("Ihr aktueller Token ist abgelaufen")
             tokentxt = input("Bitte geben Sie einen gültigen Token ein und bestätigen mit Enter:")
-            with open('DataFiles/refreshtoken.txt', 'w') as f:
+            with open(tokenPath, 'w') as f:
                 f.write(tokentxt)
                 f.close()
             p = refreshT(s)
@@ -178,7 +179,7 @@ def authLoopRequest(s):
 
 
 
-def get_error_msg(fehlerstandorte):
+def get_error_msg(fehlerstandorte, atoken):
     Status = ""
     StatusListe = []
     headers = {
@@ -219,11 +220,13 @@ def get_error_msg(fehlerstandorte):
 
 if __name__ == '__main__':
     i = 0
+    tokenPath = 'C:/Users/AJ2MSGR/PycharmProjects/WebScrapingForDummies/A2WorkingSkrips/DataFiles/refreshtoken.txt'
     urllist = ["https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=FAULTED",
             "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=INACTIVE"
             ]
     s = requests.session()
-    authLoopRequest(s)
+    authLoopRequest(s, tokenPath)
+
 
     with open('DataFiles/refreshtoken.txt', 'r') as jsonf:
         data = json.load(jsonf)
@@ -233,20 +236,20 @@ if __name__ == '__main__':
     fehlerstandorte = BackendRequestTemplate(atoken,urllist[0],s,i) #typ = fehler
     i = 1
 
-    get_error_msg(fehlerstandorte)
+    get_error_msg(fehlerstandorte, atoken)
     offlinestandorte = BackendRequestTemplate(atoken, urllist[1], s, i ) #typ = offline
 
     f = open("DataFiles/offlinestandorte.text", 'w')
     f.write(json.dumps(offlinestandorte))
 
-    authLoopRequest(s)
+    authLoopRequest(s, tokenPath)
 
     with open('DataFiles/refreshtoken.txt', 'r') as jsonf:
         data = json.load(jsonf)
         print(data['refresh_token'])
     atoken = 'Bearer ' + data['access_token']
 
-    fehlerstandorteStatus = cpstate(fehlerstandorte)
+    fehlerstandorteStatus = cpstate(fehlerstandorte, atoken)
 
     f = open("DataFiles/fehlerstandorteStatus.text", 'w')
     f.write(json.dumps(fehlerstandorteStatus))
