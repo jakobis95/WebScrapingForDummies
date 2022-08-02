@@ -25,7 +25,6 @@ def addShit(ws):
     tab.tableStyleInfo = style
     ws.add_table(tab)
 
-
 def addCol(ws, colNr ,headerRow , headerVal):
     ws.insert_cols(colNr)
     ws.cell(row=headerRow, column=colNr).value = headerVal
