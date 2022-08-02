@@ -1,6 +1,7 @@
 import os
 from openpyxl import load_workbook
 from openpyxl.worksheet.table import Table, TableStyleInfo
+from copy import copy
 
 
 def addShit(ws):
@@ -28,6 +29,9 @@ def addShit(ws):
 def addCol(ws, colNr ,headerRow , headerVal):
     ws.insert_cols(colNr)
     ws.cell(row=headerRow, column=colNr).value = headerVal
+    #Adds correct color to Today column
+    ws.cell(row=headerRow, column=colNr).fill = copy(ws.cell(row=headerRow, column=colNr-1).fill)
+    ws.cell(row=headerRow, column=colNr).alignment = copy(ws.cell(row=headerRow, column=colNr - 1).alignment)
 
 def update(xlsxPfad, sheetName):
     wb = load_workbook(filename=xlsxPfad)
@@ -46,6 +50,11 @@ def replaceTab(ws, ref, displayName):
     #change current table to new enlarged table
     ws.tables[displayName] = entab
 
+"""
+Wenn etwas in einer bestehenden Tabelle geändert werden muss danach auch die Tabelle erneuert werden soll wird die xlsx nicht zu oeffnen sein
+bisher ist mir das beim hinzufügen von spalten und dem Verändern der Spalten Überschrift aufgefallen
+beim verändern des alignment der Überschriften und des Fill
+"""
 if __name__ == "__main__":
     UserName = os.getlogin()
     xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Downloads\\book1.xlsx"
