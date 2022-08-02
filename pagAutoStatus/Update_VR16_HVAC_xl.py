@@ -51,7 +51,7 @@ def start_Update_from_Jira(jira_xlsx_path_HVAC, jira_xlsx_path_VR16, master_xlsx
     update_HVAC_Status(jira_ws_HVAC, status_ws, "Key", "HVAC action (WMQ1)", "Jira Epic", "HVAC")
     update_HVAC_Status(jira_ws_VR16, status_ws, "Key", "VR 16 Update (WMQ2)", "Jira Epic", "VR16")
     wb_master.save(master_xlsx_path)
-    os.startfile(master_xlsx_path)
+    #os.startfile(master_xlsx_path)
 
 
 if __name__ == "__main__":
