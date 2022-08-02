@@ -4,6 +4,7 @@ from tkinter import ttk
 import sqlite3
 import json
 import os
+import time
 import requests
 import A3SupportingGeneralFunctions.FileManagementTools as fileMan
 from pagAutoStatus.FillCbxStatusPAG import WriteStatusToXL
@@ -46,31 +47,34 @@ if __name__ == "__main__":
     if check_files_timeliness(files) != True:
         exit()
 #CBXStatusUpdate
+    tokenPath = 'C:/Users/AJ2MSGR/PycharmProjects/WebScrapingForDummies/A2WorkingSkrips/DataFiles/refreshtoken.txt'
     i = 0
     urllist = ["https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=FAULTED",
             "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=INACTIVE"
             ]
     s = requests.session()
-    authLoopRequest(s)
-    with open('DataFiles/refreshtoken.txt', 'r') as jsonf:
+    authLoopRequest(s, tokenPath)
+    with open(tokenPath, 'r') as jsonf:
         data = json.load(jsonf)
         print( data['refresh_token'])
     atoken = 'Bearer ' + data['access_token']
     i = 0
-    fehlerstandorte = BackendRequestTemplate(atoken,urllist[0],s,i) #typ = fehler
-    i = 1
-    get_error_msg(fehlerstandorte)
-    offlinestandorte = BackendRequestTemplate(atoken, urllist[1], s, i ) #typ = offline
-    f = open("DataFiles/offlinestandorte.text", 'w')
-    f.write(json.dumps(offlinestandorte))
-    authLoopRequest(s)
-    with open('DataFiles/refreshtoken.txt', 'r') as jsonf:
+    # fehlerstandorte = BackendRequestTemplate(atoken,urllist[0],s,i) #typ = fehler
+    # i = 1
+    # get_error_msg(fehlerstandorte, atoken)
+    # offlinestandorte = BackendRequestTemplate(atoken, urllist[1], s, i ) #typ = offline
+    # f = open("DataFiles/offlinestandorte.text", 'w')
+    # f.write(json.dumps(offlinestandorte))
+    authLoopRequest(s, tokenPath)
+
+    with open(tokenPath, 'r') as jsonf:
         data = json.load(jsonf)
         print(data['refresh_token'])
     atoken = 'Bearer ' + data['access_token']
-    fehlerstandorteStatus = cpstate(fehlerstandorte)
-    f = open("DataFiles/fehlerstandorteStatus.text", 'w')
-    f.write(json.dumps(fehlerstandorteStatus))
+
+    # fehlerstandorteStatus = cpstate(fehlerstandorte, atoken)
+    # f = open("DataFiles/fehlerstandorteStatus.text", 'w')
+    # f.write(json.dumps(fehlerstandorteStatus))
 
 #FillCbxStatusPAG
 
@@ -78,14 +82,14 @@ if __name__ == "__main__":
     fehlerCBX = json.load(f)
     f = open("C:/Users/AJ2MSGR/PycharmProjects/WebScrapingForDummies/A2WorkingSkrips/DataFiles/offlinestandorte.text", 'r')
     offlineCBX = json.load(f)
-    WriteStatusToXL(master_xlsx_path, offlineCBX, fehlerCBX)
-
+    #WriteStatusToXL(master_xlsx_path, offlineCBX, fehlerCBX)
+    time.sleep(10)
 #Update_VR16_HVAC_xl
     start_Update_from_Jira(jira_xlsx_path_HVAC,jira_xlsx_path_VR16,master_xlsx_path)
-
+    time.sleep(10)
 #Jira_Bugs_to_XL
     write_Bugs_to_XL(jira_CSV_Path, master_xlsx_path)
-
+    time.sleep(10)
 #Finished Prozess open complete file
-    os.startfile(master_xlsx_path)
+    #os.startfile(master_xlsx_path)
 
