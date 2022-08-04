@@ -4,10 +4,19 @@ from openpyxl import load_workbook, styles
 from openpyxl.styles import Font, Color
 from A3SupportingGeneralFunctions.NavigateInExcel import searchXL
 from datetime import datetime
+from UserInterface.AddC import addColToRef,addCol, update, replaceTab
 
 def updateChangeFormula(coordinateM1, coordinateToday):
     return '=IF(MID('+ str(coordinateToday) +',1,2)=MID('+ str(coordinateM1) +',1,2),"",IF(AND('+ str(coordinateToday) +'="yes",'+ str(coordinateM1) +'<>"yes"),"better",IF(AND('+ str(coordinateToday) +'<>"",'+ str(coordinateToday) +'<>"yes"),"worse","")))'
 
+def addTodayColumn(wb, StatusWB, TodayColumn, TodayRow,CW,TableName):
+    addCol(StatusWB, TodayColumn + 1, TodayRow, "Full/Part KW" + str(CW[1] + 1))
+    addColToRef(StatusWB.tables[TableName].ref, 1)
+    newRef = addColToRef(StatusWB.tables[TableName].ref, 1)
+    replaceTab(StatusWB, newRef, TableName)
+    wb.save(xlsxPfad)
+    wb, StatusWB = update(xlsxPfad, "STATUS")
+    return wb, StatusWB
 
 def pOrN(StatusLastWeek, StatusThisWeek):
     if StatusThisWeek == None:
@@ -70,19 +79,19 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
     LastRow = StatusWB.max_row
     CW = datetime.today().isocalendar()
     TodayColumnString = "Full/Part KW" + str(CW[1]) #todo gibt diese den Namen der Woche an.
+    #TodayColumnString = "Full/Part KW"
     #finds Column with the date of today
     cpNoCoordinate = searchXL(StatusWB, "hardware_prim_dc_no_chargers")
     cpNoColumn = cpNoCoordinate[1]
     CPMID = searchXL(StatusWB, "CPM ID")
     cpmidColumn = CPMID[1]
-    TodayCell = searchXL(StatusWB, TodayColumnString, krit=True) #findet jetzt die heutige Spalte
 
-    TodayColumn = TodayCell[1]
-    TodayRow = TodayCell[0]
-    #todo wird nicht gebraucht
-    # cp1Column = searchXL(StatusWB, "1")[1]
-    # cp2Column = searchXL(StatusWB, "2")[1]
-    # cpColumn = [cp1Column,cp2Column]
+    TodayRow, TodayColumn = searchXL(StatusWB, TodayColumnString) #findet jetzt die heutige Spalte
+
+    while TodayRow == "NotFound":
+        input("Für Woche" + str(CW[1]) + " gibt es keine Spalte in der Exceltabelle\n Bitte Spalte hinzufügen, Excel Speichern und wieder schließen\n Bitte mit y bestätigen")
+        wb, StatusWB = update(xlsxPfad, "STATUS")
+        TodayRow, TodayColumn = searchXL(StatusWB, TodayColumnString)
 
     if TodayColumn != "notFound":
         print("XX today Column is:", TodayColumn)
@@ -193,15 +202,15 @@ if __name__ == "__main__":
 
     f = open("C:/Users/AJ2MSGR/PycharmProjects/WebScrapingForDummies/A2WorkingSkrips/DataFiles/fehlerstandorteStatus.text", 'r')
     fehlerCBX = json.load(f)
-    for element in fehlerCBX:
-        for item in element:
-            print(item)
-
+    # for element in fehlerCBX:
+    #     for item in element:
+    #         print(item)
+    #
     f = open("C:/Users/AJ2MSGR/PycharmProjects/WebScrapingForDummies/A2WorkingSkrips/DataFiles/offlinestandorte.text", 'r')
     offlineCBX = json.load(f)
-    for element in offlineCBX:
-        print(element)
-
+    # for element in offlineCBX:
+    #     print(element)
+    #
     WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX)
-
-    os.startfile(xlsxPfad)
+    #
+    # os.startfile(xlsxPfad)
