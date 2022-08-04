@@ -1,7 +1,16 @@
 import os
 from openpyxl import load_workbook
 from openpyxl.worksheet.table import Table, TableStyleInfo
+from openpyxl.utils.cell import coordinate_to_tuple, get_column_letter
 from copy import copy
+
+def addColToRef(ref, additionalCols):
+    refStart = ref.split(":")[0]
+    refEnd = ref.split(":")[1]
+    refRow,refCol = coordinate_to_tuple(refEnd)
+    newCol = get_column_letter(refCol + additionalCols)
+    newRef = refStart + ":" + newCol + str(refRow)
+    return newRef
 
 
 def addShit(ws):
@@ -30,10 +39,16 @@ def addCol(ws, colNr ,headerRow , headerVal):
     ws.cell(row=headerRow, column=colNr).value = headerVal
     #Adds correct color to Today column
     ws.cell(row=headerRow, column=colNr).fill = copy(ws.cell(row=headerRow, column=colNr-1).fill)
-    ws.cell(row=headerRow, column=colNr).alignment = copy(ws.cell(row=headerRow, column=colNr - 1).alignment)
+    ws.cell(row=headerRow, column=colNr).alignment = copy(ws.cell(row=headerRow, column=colNr-1).alignment)
 
 def update(xlsxPfad, sheetName):
-    wb = load_workbook(filename=xlsxPfad)
+    check = False
+    while not check:
+        try:
+            wb = load_workbook(filename=xlsxPfad)
+            check = True
+        except:
+            input("Excel konnte nicht gupdated werden, stellen Sie sich das die Datei geschlossen ist\n um Update zu wiederholen y drücken")
     ws = wb[sheetName]
     wb.save(xlsxPfad)
     return wb,ws
@@ -46,8 +61,12 @@ def replaceTab(ws, ref, displayName):
     #create new enlarged table
     entab = Table(displayName=displayName, ref=ref)
     entab.tableStyleInfo = style
-    #change current table to new enlarged table
+    entab.autoFilter = autofilter
+    #change current table to new enlarged tablead
     ws.tables[displayName] = entab
+
+
+
 
 """
 Wenn etwas in einer bestehenden Tabelle geändert werden muss danach auch die Tabelle erneuert werden soll wird die xlsx nicht zu oeffnen sein
