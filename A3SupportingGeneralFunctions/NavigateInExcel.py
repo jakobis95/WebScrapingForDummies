@@ -138,6 +138,14 @@ def searchXL(ws, searchTerm, searchArea = 0, rowcol = "all", begin = 0, krit = F
 
     return Ycor, Xcor
 
+def isTodayCol(worksheet,CW,TodayColumnString):
+    i = 0
+    x = "NotFound"
+    while x == "NotFound":
+        searchTerm = TodayColumnString + str(CW[1]-i)
+        y,x = searchXL(worksheet, searchTerm)
+        i = i + 1
+    return y,x,i
 
 
 if __name__ == "__main__":
