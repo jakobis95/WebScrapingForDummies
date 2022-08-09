@@ -5,6 +5,7 @@ from openpyxl.styles import Font, Color
 from A3SupportingGeneralFunctions.NavigateInExcel import searchXL
 from datetime import datetime
 from UserInterface.AddC import addColToRef,addCol, update, replaceTab
+import cProfile
 
 def updateChangeFormula(coordinateM1, coordinateToday):
     return '=IF(MID('+ str(coordinateToday) +',1,2)=MID('+ str(coordinateM1) +',1,2),"",IF(AND('+ str(coordinateToday) +'="yes",'+ str(coordinateM1) +'<>"yes"),"better",IF(AND('+ str(coordinateToday) +'<>"",'+ str(coordinateToday) +'<>"yes"),"worse","")))'
@@ -154,8 +155,9 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
             TodayFehlerWB.cell(row=todayCbxCounter, column=3).value = item['chargePointName']
             TodayFehlerWB.cell(row=todayCbxCounter, column=4).value = 'Fehler'
             todayCbxCounter = todayCbxCounter + 1
-            wb.save(xlsxPfad)
+            #wb.save(xlsxPfad)
         i = 1
+        wb.save(xlsxPfad)
         # while NIBfehlerWB.cell(row=i, column=1).value != None:
         #     searchTerm = NIBfehlerWB.cell(row=i, column=1).value
         #     foundRow = searchXL(StatusWB, searchTerm, 1, "col")[0]
@@ -192,25 +194,24 @@ def WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX):
     #xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Downloads\\Aktuelle_IBN_Kopie2.xlsx"
     wb.save(xlsxPfad)
 
-
-
 if __name__ == "__main__":
     UserName = os.getlogin()
     xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Downloads\\IBN_Tracking.xlsx"
 
-    #xlsxPfadFeedback = "C:\\Users\\" + str(UserName) + "\\Desktop\\TrackingFeedback.xlsx"
+    # xlsxPfadFeedback = "C:\\Users\\" + str(UserName) + "\\Desktop\\TrackingFeedback.xlsx"
 
-    f = open("C:/Users/AJ2MSGR/PycharmProjects/WebScrapingForDummies/A2WorkingSkrips/DataFiles/fehlerstandorteStatus.text", 'r')
+    f = open(
+        "C:/Users/AJ2MSGR/PycharmProjects/WebScrapingForDummies/A2WorkingSkrips/DataFiles/fehlerstandorteStatus.text",
+        'r')
     fehlerCBX = json.load(f)
     # for element in fehlerCBX:
     #     for item in element:
     #         print(item)
     #
-    f = open("C:/Users/AJ2MSGR/PycharmProjects/WebScrapingForDummies/A2WorkingSkrips/DataFiles/offlinestandorte.text", 'r')
+    f = open("C:/Users/AJ2MSGR/PycharmProjects/WebScrapingForDummies/A2WorkingSkrips/DataFiles/offlinestandorte.text",
+             'r')
     offlineCBX = json.load(f)
     # for element in offlineCBX:
     #     print(element)
     #
     WriteStatusToXL(xlsxPfad, offlineCBX, fehlerCBX)
-    #
-    # os.startfile(xlsxPfad)

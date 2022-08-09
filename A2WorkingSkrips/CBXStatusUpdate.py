@@ -1,7 +1,7 @@
 import requests
 import json
 import time
-
+import os
 
 def updateCBXdisplay(CP, atoken, s):
     elements = CP
@@ -18,17 +18,17 @@ def updateCBXdisplay(CP, atoken, s):
     }
 
     # update Ladestatus
-    url = ("https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[
-                                                                                   :12] + "_LMS01/request?lmsGlobalId=00000000000100030" +
+    url = ("https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:12] + "_LMS01/request?lmsGlobalId=00000000000100030" +
            str(elements['uniqueId'])[17] + "0a&force=true")
     s.get(url, headers=headers, verify=False)
 
-    time.sleep(2)
+    time.sleep(1)
     # update error message board
     url = ("https://api.chargepoint-management.com/maintenance/v1/dtcs/" + str(elements['uniqueId'])[:12] + "_LMS01/request?lmsGlobalId=00000000000100050" +
            str(elements['uniqueId'])[17] + "0f&dtcStatus=31&force=true")
     s.get(url, headers=headers, verify=False)
-    time.sleep(2)
+    #time.sleep(2)
+
 def getCBXdata(CP, atoken, s):
     elements = CP
 
@@ -58,14 +58,15 @@ def getCBXdata(CP, atoken, s):
     print(errorJ)
 
     return CPdataJ, errorJ, errorStr
-def cpstate(fehlerstandorte, atoken):
+
+def cpstate(fehlerstandorte, atoken, s, JSONSamplePath):
     StatusListe = []
 
     for elements in fehlerstandorte:
         updateCBXdisplay(elements, atoken,s)
 
 #fehlerstandorte durchgehen
-    f = open("DataFiles/JSONsample.txt")
+    f = open(JSONSamplePath)
     JSONlist = json.load(f)
 
     for elements in fehlerstandorte:
@@ -85,7 +86,7 @@ def cpstate(fehlerstandorte, atoken):
             Status = "Error"
         else:
             Status = str(CPdataJ['message']['idents'][8]['value'])
-        StatusListe.append( Status + " : " + str(elements['masterData']['chargePointName']) + " : " +str(elements['uniqueId'] +" : " + errorStr
+        StatusListe.append(Status + " : " + str(elements['masterData']['chargePointName']) + " : " +str(elements['uniqueId'] +" : " + errorStr
                                                                                                          ))
 
         element = {"chargePointName": "", "uniqueId": "", "Status": "", "ErrorMessage": ""}
@@ -179,7 +180,7 @@ def authLoopRequest(s, tokenPath):
 
 
 
-def get_error_msg(fehlerstandorte, atoken):
+def get_error_msg(fehlerstandorte, atoken, s):
     Status = ""
     StatusListe = []
     headers = {
@@ -220,13 +221,14 @@ def get_error_msg(fehlerstandorte, atoken):
 
 if __name__ == '__main__':
     i = 0
+    UserName = os.getlogin()
     tokenPath = 'C:/Users/AJ2MSGR/PycharmProjects/WebScrapingForDummies/A2WorkingSkrips/DataFiles/refreshtoken.txt'
     urllist = ["https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=FAULTED",
             "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=INACTIVE"
             ]
     s = requests.session()
     authLoopRequest(s, tokenPath)
-
+    JSONSamplePath = "C:/Users/"+ UserName +"/PycharmProjects/WebScrapingForDummies/A2WorkingSkrips/DataFiles/JSONsample.txt"
 
     with open('DataFiles/refreshtoken.txt', 'r') as jsonf:
         data = json.load(jsonf)
@@ -236,7 +238,7 @@ if __name__ == '__main__':
     fehlerstandorte = BackendRequestTemplate(atoken,urllist[0],s,i) #typ = fehler
     i = 1
 
-    get_error_msg(fehlerstandorte, atoken)
+    get_error_msg(fehlerstandorte, atoken,s )
     offlinestandorte = BackendRequestTemplate(atoken, urllist[1], s, i ) #typ = offline
 
     f = open("DataFiles/offlinestandorte.text", 'w')
@@ -249,7 +251,7 @@ if __name__ == '__main__':
         print(data['refresh_token'])
     atoken = 'Bearer ' + data['access_token']
 
-    fehlerstandorteStatus = cpstate(fehlerstandorte, atoken)
+    fehlerstandorteStatus = cpstate(fehlerstandorte, atoken,s, JSONSamplePath)
 
     f = open("DataFiles/fehlerstandorteStatus.text", 'w')
     f.write(json.dumps(fehlerstandorteStatus))
