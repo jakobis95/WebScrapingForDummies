@@ -37,10 +37,18 @@ def check_files_timeliness(files):
                 return False
     else:
         return True
+def askForToken():
+    tokentxt = input("Bitte geben Sie einen aktuellen Authentifizierungstoken ein und bestätigen Sie mit Enter")
+    with open(tokenPath, 'w') as f:
+        f.write(tokentxt)
+    f.close()
+
 
 if __name__ == "__main__":
 
 #Data directory
+    input("Wurde eine Spalte für den heutigen Tag angelegt? Bitte mit Enter bestätigen.")
+    input("Stellen Sie sicher dass Sie nicht im Porsche Wlan/Netzwerk sind? Bitte mit Enter bestätigen.")
     disable_warnings(InsecureRequestWarning)
     UserName = os.getlogin()
     jira_xlsx_path_HVAC = "C:\\Users\\" + str(UserName) + "\\Downloads\\HVACOverview.xlsx"
@@ -50,12 +58,15 @@ if __name__ == "__main__":
 
     files = [jira_xlsx_path_VR16, jira_xlsx_path_HVAC, jira_CSV_Path]
     if check_files_timeliness(files) != True:
+        print("Ihre Jira Dateien sind nicht aktuell und ihr skript wurde beendet")
         exit()
 #CBXStatusUpdate
     tokenPath = 'C:/Users/AJ2MSGR/PycharmProjects/WebScrapingForDummies/A2WorkingSkrips/DataFiles/refreshtoken.txt'
     urllist = ["https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=FAULTED",
             "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=INACTIVE"
             ]
+
+    #askForToken()
     s = requests.session()
     authLoopRequest(s, tokenPath)
     with open(tokenPath, 'r') as jsonf:
@@ -65,7 +76,7 @@ if __name__ == "__main__":
     i = 0
     fehlerstandorte = BackendRequestTemplate(atoken,urllist[0],s,i) #typ = fehler
     i = 1
-    get_error_msg(fehlerstandorte, atoken, s)
+    #get_error_msg(fehlerstandorte, atoken, s)
     offlinestandorte = BackendRequestTemplate(atoken, urllist[1], s, i ) #typ = offline
     offlinestandorteTxtPath = "C:/Users/"+ UserName+"/PycharmProjects/WebScrapingForDummies/A2WorkingSkrips/DataFiles/offlinestandorte.text"
     f = open(offlinestandorteTxtPath, 'w')

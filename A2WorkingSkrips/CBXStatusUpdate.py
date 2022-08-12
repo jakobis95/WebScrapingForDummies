@@ -3,6 +3,27 @@ import json
 import time
 import os
 
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█'):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print('\r', f'\r{prefix} |{bar}| {percent}% {suffix}', end = '')
+    # Print New Line on Complete
+    if iteration == total:
+        print()
+
 def updateCBXdisplay(CP, atoken, s):
     elements = CP
 
@@ -45,35 +66,45 @@ def getCBXdata(CP, atoken, s):
 
     # get mesurements loading control
     url = ("https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:12] + "_LMS01?lmsGlobalId=00000000000100030" +str(elements['uniqueId'])[17] + "0a")
-    print(url)
+    #print(url)
     CPdata = s.get(url, headers=headers, verify=False)
     CPdataJ = CPdata.json()
 
     # get error message from Chargepoint
     url = ("https://api.chargepoint-management.com/maintenance/v1/dtcs/" + str(elements['uniqueId'])[:12] + "_LMS01?lmsGlobalId=00000000000100050" + str(elements['uniqueId'])[17] + "0f")
-    print(url)
+    #print(url)
     errorData = s.get(url, headers=headers, verify=False)
     errorJ = errorData.json()
     errorStr = "X"
-    print(errorJ)
+    #print(errorJ)
 
     return CPdataJ, errorJ, errorStr
 
 def cpstate(fehlerstandorte, atoken, s, JSONSamplePath):
     StatusListe = []
 
+    elementsIn = 0
     for elements in fehlerstandorte:
-        updateCBXdisplay(elements, atoken,s)
+        elementsIn = elementsIn + 1
+
+    counter = 0
+    for elements in fehlerstandorte:
+        updateCBXdisplay(elements, atoken, s)
+        counter = counter + 1
+        printProgressBar(counter, elementsIn, prefix="CP State Updating")
 
 #fehlerstandorte durchgehen
     f = open(JSONSamplePath)
     JSONlist = json.load(f)
 
+    counter = 0
     for elements in fehlerstandorte:
         Data = getCBXdata(elements, atoken,s)
         CPdataJ = Data[0]
         errorJ = Data[1]
         errorStr = Data[2]
+        counter  = counter + 1
+        printProgressBar(counter, elementsIn, prefix="Downloading CP State")
 
 
         if errorJ['message'] == None:
@@ -94,7 +125,7 @@ def cpstate(fehlerstandorte, atoken, s, JSONSamplePath):
         element['Status'] = Status
         element['uniqueId'] = elements['uniqueId']
         element['ErrorMessage'] = errorStr
-        print(element)
+        #print(element)
         if Status != "State B - car connected":
             JSONlist.append(element)
     print(JSONlist)
@@ -116,18 +147,18 @@ def BackendRequestTemplate(atoken, url, s, i):
     }
 
     p = s.get(url, headers=headers,  verify=False)
-    print(p)
+    #print(p)
     CPList = []
     Zustand = ["fehler.json", "offline.json", "alle.json"]
     with open(Zustand[i], 'w') as f:
         f.write(p.text)
     with open(Zustand[i], 'r' ) as c:
         obj = json.load(c)
-        print(Zustand[i] + ":::::::::")
+        print(Zustand[i] + "::::::::: wird erstellt")
         for elements in obj['content']:
             if str(elements['uniqueId'])[13:15] == "CP"  and str(elements['firmwareVersion']) != "" and elements['masterData']['chargingFacilities'][0]['power'] < 350:
                 if str(elements["manufacturerModelId"]["name"]) == "DC CBX" or  "DC Premium (2 CP)":
-                    print(str(elements['masterData']['chargingFacilities'][0]['power']) + ":" + str(elements['uniqueId']) + ":" + str(elements['masterData']['chargePointName']) + " : " + str(elements['firmwareVersion']))
+                    #print(str(elements['masterData']['chargingFacilities'][0]['power']) + ":" + str(elements['uniqueId']) + ":" + str(elements['masterData']['chargePointName']) + " : " + str(elements['firmwareVersion']))
                     CPList.append(elements)
 
     return CPList
