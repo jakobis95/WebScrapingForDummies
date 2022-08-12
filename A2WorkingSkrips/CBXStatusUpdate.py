@@ -164,6 +164,7 @@ def BackendRequestTemplate(atoken, url, s, i):
     return CPList
 
 
+
 def refreshT(s): # Hier wird der Token refreshed
     #die verwendete Json datei wird aus dem Browser kopiert
     tokenPath = 'C:/Users/AJ2MSGR/PycharmProjects/WebScrapingForDummies/A2WorkingSkrips/DataFiles/refreshtoken.txt'
