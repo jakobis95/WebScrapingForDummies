@@ -24,7 +24,7 @@ def createList(string):
 
 if __name__ == "__main__":
     UserName = os.getlogin()
-    xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Documents\\Commissioning Report - PC East-Flanders - 20220718.xlsm"
+    xlsxPfad = "C:\\Users\\" + str(UserName) + "\\Documents\\Annex_G_ Commissioning_Report_KLL_Template_en.xlsm"
     ibnData = returnPDFdata(xlsxPfad)
 
 
@@ -70,7 +70,7 @@ if __name__ == "__main__":
 
             #xmldoc.writexml(open('East_Flanders_IBN.xml', 'w'), indent="  ", addindent="  ", newl='\n')
         elif new == "POWER_SUPPLY":
-            drawing = "C:\\Users\\AJ2MSGR\\Documents\\Commissioning Report - PC East-Flanders - 20220718\\xl\drawings\\drawing1.xml"
+            drawing = "C:\\Users\\AJ2MSGR\\Documents\\Commissioning Report - PC East-Flanders - 20220718\\xl\\drawings\\drawing1.xml"
             sheet = "C:\\Users\\AJ2MSGR\\Documents\\Commissioning Report - PC East-Flanders - 20220718\\xl\\worksheets\\sheet1.xml"
             ctrPropsDir = "C:\\Users\\AJ2MSGR\\Documents\\Commissioning Report - PC East-Flanders - 20220718\\xl\\ctrlProps"
             relSheet = "C:\\Users\\AJ2MSGR\\Documents\\Commissioning Report - PC East-Flanders - 20220718\\xl\\worksheets\\_rels\\sheet1.xml.rels"
@@ -90,4 +90,5 @@ if __name__ == "__main__":
             nodeText = xmldoc.createTextNode(str(ibnData[int(ws.cell(row=i, column=5).value)][int(ws.cell(row=i, column=6).value)]))
             node[1].appendChild(nodeText)
         old = ws.cell(row=i, column=1).value
-    xmldoc.writexml(open('East_Flanders_IBN.xml', 'w'), indent="  ", addindent="  ", newl='\n')
+    xmldoc.writexml(open('Romania_IBN.xml', 'w'), indent="  ", addindent="  ", newl='\n')
+    #todo Die Netzteil leistung wird irgendwie nicht richtig eingelesen.

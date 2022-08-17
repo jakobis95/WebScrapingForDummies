@@ -5,10 +5,18 @@ from openpyxl import Workbook
 from datetime import datetime
 from openpyxl.formatting.rule import ColorScale, FormatObject, CellIsRule
 from openpyxl.styles import Color, PatternFill, Font, Border
+from openpyxl.utils.cell import coordinate_to_tuple, get_column_letter
 from openpyxl.styles.differential import DifferentialStyle
 """
     Hallo das ist ein gut lesbares Kommentar
 """
+def tablRowRef(ref):
+    refStart = ref.split(":")[0]
+    startRow, startCol = coordinate_to_tuple(refStart)
+    refEnd = ref.split(":")[1]
+    endRow, endCol = coordinate_to_tuple(refEnd)
+    return startRow, endRow
+
 def conditional_formatting_with_rules(ws, todayCol):
     #styles
     greyFill = PatternFill(start_color='D9D9D9', end_color='D9D9D9', fill_type='solid')
@@ -138,6 +146,33 @@ def searchXL(ws, searchTerm, searchArea = 0, rowcol = "all", begin = 0, krit = F
 
     return Ycor, Xcor
 
+def hashSearch(list, searchTerm):
+    import pandas as pd
+    hash_search_term = hash(searchTerm)
+    df = pd.DataFrame(list, columns=['row', 'value'])
+    df["value"] = df["value"].apply(hash)
+    df = df.sort_values("value")
+    elements = df.count()[1]
+    found = False
+    while elements > 2:
+        middle_index = int(round(elements / 2, 0) - 1)
+        value = df.iloc[middle_index][1]
+        print(value)
+        if value > hash_search_term:
+            df = df.iloc[:middle_index]
+        else:
+            df = df.iloc[middle_index:]
+        elements = df.count()[1]
+    return df.iloc[0]
+
+def isTodayCol(worksheet,CW,TodayColumnString):
+    i = 0
+    x = "NotFound"
+    while x == "NotFound":
+        searchTerm = TodayColumnString + str(CW[1]-i)
+        y,x = searchXL(worksheet, searchTerm)
+        i = i + 1
+    return y,x,i
 
 
 if __name__ == "__main__":

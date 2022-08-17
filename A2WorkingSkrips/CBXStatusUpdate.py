@@ -1,7 +1,28 @@
 import requests
 import json
 import time
+import os
 
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█'):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print('\r', f'\r{prefix} |{bar}| {percent}% {suffix}', end = '')
+    # Print New Line on Complete
+    if iteration == total:
+        print()
 
 def updateCBXdisplay(CP, atoken, s):
     elements = CP
@@ -18,17 +39,17 @@ def updateCBXdisplay(CP, atoken, s):
     }
 
     # update Ladestatus
-    url = ("https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[
-                                                                                   :12] + "_LMS01/request?lmsGlobalId=00000000000100030" +
+    url = ("https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:12] + "_LMS01/request?lmsGlobalId=00000000000100030" +
            str(elements['uniqueId'])[17] + "0a&force=true")
     s.get(url, headers=headers, verify=False)
 
-    time.sleep(2)
+    time.sleep(1)
     # update error message board
     url = ("https://api.chargepoint-management.com/maintenance/v1/dtcs/" + str(elements['uniqueId'])[:12] + "_LMS01/request?lmsGlobalId=00000000000100050" +
            str(elements['uniqueId'])[17] + "0f&dtcStatus=31&force=true")
     s.get(url, headers=headers, verify=False)
-    time.sleep(2)
+    #time.sleep(2)
+
 def getCBXdata(CP, atoken, s):
     elements = CP
 
@@ -45,34 +66,45 @@ def getCBXdata(CP, atoken, s):
 
     # get mesurements loading control
     url = ("https://api.chargepoint-management.com/maintenance/v1/measurements/" + str(elements['uniqueId'])[:12] + "_LMS01?lmsGlobalId=00000000000100030" +str(elements['uniqueId'])[17] + "0a")
-    print(url)
+    #print(url)
     CPdata = s.get(url, headers=headers, verify=False)
     CPdataJ = CPdata.json()
 
     # get error message from Chargepoint
     url = ("https://api.chargepoint-management.com/maintenance/v1/dtcs/" + str(elements['uniqueId'])[:12] + "_LMS01?lmsGlobalId=00000000000100050" + str(elements['uniqueId'])[17] + "0f")
-    print(url)
+    #print(url)
     errorData = s.get(url, headers=headers, verify=False)
     errorJ = errorData.json()
     errorStr = "X"
-    print(errorJ)
+    #print(errorJ)
 
     return CPdataJ, errorJ, errorStr
-def cpstate(fehlerstandorte):
+
+def cpstate(fehlerstandorte, atoken, s, JSONSamplePath):
     StatusListe = []
 
+    elementsIn = 0
     for elements in fehlerstandorte:
-        updateCBXdisplay(elements, atoken,s)
+        elementsIn = elementsIn + 1
+
+    counter = 0
+    for elements in fehlerstandorte:
+        updateCBXdisplay(elements, atoken, s)
+        counter = counter + 1
+        printProgressBar(counter, elementsIn, prefix="CP State Updating")
 
 #fehlerstandorte durchgehen
-    f = open("DataFiles/JSONsample.txt")
+    f = open(JSONSamplePath)
     JSONlist = json.load(f)
 
+    counter = 0
     for elements in fehlerstandorte:
         Data = getCBXdata(elements, atoken,s)
         CPdataJ = Data[0]
         errorJ = Data[1]
         errorStr = Data[2]
+        counter  = counter + 1
+        printProgressBar(counter, elementsIn, prefix="Downloading CP State")
 
 
         if errorJ['message'] == None:
@@ -85,7 +117,7 @@ def cpstate(fehlerstandorte):
             Status = "Error"
         else:
             Status = str(CPdataJ['message']['idents'][8]['value'])
-        StatusListe.append( Status + " : " + str(elements['masterData']['chargePointName']) + " : " +str(elements['uniqueId'] +" : " + errorStr
+        StatusListe.append(Status + " : " + str(elements['masterData']['chargePointName']) + " : " +str(elements['uniqueId'] +" : " + errorStr
                                                                                                          ))
 
         element = {"chargePointName": "", "uniqueId": "", "Status": "", "ErrorMessage": ""}
@@ -93,7 +125,7 @@ def cpstate(fehlerstandorte):
         element['Status'] = Status
         element['uniqueId'] = elements['uniqueId']
         element['ErrorMessage'] = errorStr
-        print(element)
+        #print(element)
         if Status != "State B - car connected":
             JSONlist.append(element)
     print(JSONlist)
@@ -115,29 +147,31 @@ def BackendRequestTemplate(atoken, url, s, i):
     }
 
     p = s.get(url, headers=headers,  verify=False)
-    print(p)
+    #print(p)
     CPList = []
     Zustand = ["fehler.json", "offline.json", "alle.json"]
     with open(Zustand[i], 'w') as f:
         f.write(p.text)
     with open(Zustand[i], 'r' ) as c:
         obj = json.load(c)
-        print(Zustand[i] + ":::::::::")
+        print(Zustand[i] + "::::::::: wird erstellt")
         for elements in obj['content']:
             if str(elements['uniqueId'])[13:15] == "CP"  and str(elements['firmwareVersion']) != "" and elements['masterData']['chargingFacilities'][0]['power'] < 350:
                 if str(elements["manufacturerModelId"]["name"]) == "DC CBX" or  "DC Premium (2 CP)":
-                    print(str(elements['masterData']['chargingFacilities'][0]['power']) + ":" + str(elements['uniqueId']) + ":" + str(elements['masterData']['chargePointName']) + " : " + str(elements['firmwareVersion']))
+                    #print(str(elements['masterData']['chargingFacilities'][0]['power']) + ":" + str(elements['uniqueId']) + ":" + str(elements['masterData']['chargePointName']) + " : " + str(elements['firmwareVersion']))
                     CPList.append(elements)
 
     return CPList
 
 
+
 def refreshT(s): # Hier wird der Token refreshed
     #die verwendete Json datei wird aus dem Browser kopiert
-    with open('DataFiles/refreshtoken.txt', 'r') as jsonf:
+    tokenPath = 'C:/Users/AJ2MSGR/PycharmProjects/WebScrapingForDummies/A2WorkingSkrips/DataFiles/refreshtoken.txt'
+    with open(tokenPath, 'r') as jsonf:
         data = json.load(jsonf)
         print(data['refresh_token'])
-
+    #C:\Users\AJ2MSGR\PycharmProjects\WebScrapingForDummies\A2WorkingSkrips\DataFiles
 
     url = 'https://login.chargepoint-management.com/auth/realms/PAG/protocol/openid-connect/token'
     headers = {
@@ -159,18 +193,18 @@ def refreshT(s): # Hier wird der Token refreshed
 
     p = s.post(url, headers=headers, verify=False, data = payload )
     print(p)
-    with open('DataFiles/refreshtoken.txt', 'w') as f:
+    with open(tokenPath, 'w') as f:
         f.write(p.text)
     return p
 
-def authLoopRequest(s):
+def authLoopRequest(s, tokenPath):
     p = 999
     p = refreshT(s)
     while p.status_code != 200:
         if p.status_code != 200:
             print("Ihr aktueller Token ist abgelaufen")
             tokentxt = input("Bitte geben Sie einen gültigen Token ein und bestätigen mit Enter:")
-            with open('DataFiles/refreshtoken.txt', 'w') as f:
+            with open(tokenPath, 'w') as f:
                 f.write(tokentxt)
                 f.close()
             p = refreshT(s)
@@ -178,7 +212,7 @@ def authLoopRequest(s):
 
 
 
-def get_error_msg(fehlerstandorte):
+def get_error_msg(fehlerstandorte, atoken, s):
     Status = ""
     StatusListe = []
     headers = {
@@ -219,11 +253,14 @@ def get_error_msg(fehlerstandorte):
 
 if __name__ == '__main__':
     i = 0
+    UserName = os.getlogin()
+    tokenPath = 'C:/Users/AJ2MSGR/PycharmProjects/WebScrapingForDummies/A2WorkingSkrips/DataFiles/refreshtoken.txt'
     urllist = ["https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=FAULTED",
             "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=INACTIVE"
             ]
     s = requests.session()
-    authLoopRequest(s)
+    authLoopRequest(s, tokenPath)
+    JSONSamplePath = "C:/Users/"+ UserName +"/PycharmProjects/WebScrapingForDummies/A2WorkingSkrips/DataFiles/JSONsample.txt"
 
     with open('DataFiles/refreshtoken.txt', 'r') as jsonf:
         data = json.load(jsonf)
@@ -233,20 +270,20 @@ if __name__ == '__main__':
     fehlerstandorte = BackendRequestTemplate(atoken,urllist[0],s,i) #typ = fehler
     i = 1
 
-    get_error_msg(fehlerstandorte)
+    get_error_msg(fehlerstandorte, atoken,s )
     offlinestandorte = BackendRequestTemplate(atoken, urllist[1], s, i ) #typ = offline
 
     f = open("DataFiles/offlinestandorte.text", 'w')
     f.write(json.dumps(offlinestandorte))
 
-    authLoopRequest(s)
+    authLoopRequest(s, tokenPath)
 
     with open('DataFiles/refreshtoken.txt', 'r') as jsonf:
         data = json.load(jsonf)
         print(data['refresh_token'])
     atoken = 'Bearer ' + data['access_token']
 
-    fehlerstandorteStatus = cpstate(fehlerstandorte)
+    fehlerstandorteStatus = cpstate(fehlerstandorte, atoken,s, JSONSamplePath)
 
     f = open("DataFiles/fehlerstandorteStatus.text", 'w')
     f.write(json.dumps(fehlerstandorteStatus))
