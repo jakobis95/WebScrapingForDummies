@@ -70,7 +70,7 @@ if __name__ == "__main__":
 
             #xmldoc.writexml(open('East_Flanders_IBN.xml', 'w'), indent="  ", addindent="  ", newl='\n')
         elif new == "POWER_SUPPLY":
-            drawing = "C:\\Users\\AJ2MSGR\\Documents\\Commissioning Report - PC East-Flanders - 20220718\\xl\drawings\\drawing1.xml"
+            drawing = "C:\\Users\\AJ2MSGR\\Documents\\Commissioning Report - PC East-Flanders - 20220718\\xl\\drawings\\drawing1.xml"
             sheet = "C:\\Users\\AJ2MSGR\\Documents\\Commissioning Report - PC East-Flanders - 20220718\\xl\\worksheets\\sheet1.xml"
             ctrPropsDir = "C:\\Users\\AJ2MSGR\\Documents\\Commissioning Report - PC East-Flanders - 20220718\\xl\\ctrlProps"
             relSheet = "C:\\Users\\AJ2MSGR\\Documents\\Commissioning Report - PC East-Flanders - 20220718\\xl\\worksheets\\_rels\\sheet1.xml.rels"
