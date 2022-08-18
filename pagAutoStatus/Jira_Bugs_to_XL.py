@@ -41,10 +41,10 @@ def write_Bugs_to_XL(jira_xlsxPfad, xlsxPfad):
     print("active Issue Columne clean and ready")
     i=1
     while JiraBugs.cell(row=EpicLink[0], column=i).value != None:
-        print(JiraBugs.cell(row=1, column=i).value)
+        #print(JiraBugs.cell(row=1, column=i).value)
         columnDict[JiraBugs.cell(row=1, column=i).value] = i
         i = i + 1
-    print(columnDict)
+    #print(columnDict)
     i = 1
     while JiraBugs.cell(row=i, column= columnDict["Epic Link"]).value != None:
         searchResponse = searchXL(Status, JiraBugs.cell(row=i, column=columnDict["Epic Link"]).value, wbEpicNumberCol, "col")
