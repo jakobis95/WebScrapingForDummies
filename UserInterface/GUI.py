@@ -11,12 +11,15 @@ from pagAutoStatus.Update_VR16_HVAC_xl import start_Update_from_Jira
 from A2WorkingSkrips.CBXStatusUpdate import BackendRequestTemplate,cpstate,authLoopRequest,get_error_msg
 from urllib3.exceptions import InsecureRequestWarning
 from urllib3 import disable_warnings
+from Main import updateLocations, fillCBXStatusCtrl, updateVR16_HVAC, updateCurrentBugs
 from A3SupportingGeneralFunctions.FileManagementTools import askForToken, check_files_timeliness
 # Path needed
 disable_warnings(InsecureRequestWarning)
 cwd = Path().cwd().parent
 fehlerstandorteTxtPath = Path(cwd, "A2WorkingSkrips/DataFiles/fehlerstandorteStatus.text")
 offlinestandorteTxtPath = Path(cwd, "A2WorkingSkrips/DataFiles/offlinestandorte.text")
+tokenPath = Path(cwd, "A2WorkingSkrips/DataFiles/refreshtoken.txt")
+JSONSamplePath = Path(cwd, "A2WorkingSkrips/DataFiles/JSONsample.txt")
 #Temp Programm parts
 UserName = os.getlogin()
 jira_xlsx_path_HVAC = "C:\\Users\\" + str(UserName) + "\\Downloads\\HVACOverview.xlsx"
@@ -26,12 +29,12 @@ jira_CSV_Path = "C:\\Users\\" + str(UserName) + "\\Downloads\\current_bugs.xlsx"
 
 layout = [
     [sg.Text("CBX Doc Update Tool")],
-    [sg.Multiline(size=(110, 10), echo_stdout_stderr=True, reroute_stdout=True, autoscroll=True,
-                  background_color='black', text_color='white', key='-MLINE-')],
     [sg.Button("Run All")],
-    [sg.Button("get Path")],
-    [sg.Button("Excel mit CBX Status befüllen")]
     [sg.Button("Update Locations")],
+    [sg.Button("get Path")],
+    [sg.Button("Excel mit CBX Status befüllen")],
+    [sg.Button("HVAC und VR16 von Jira eintragen")],
+    [sg.Button("Current Bugs von Jira eintragen")],
     [sg.Button("Exit")]
 ]
 
@@ -46,63 +49,30 @@ while True:
     if event == "Exit" or event == sg.WIN_CLOSED:
         break
     if event == "Run All":
-        sg.popup("This Feature isnt currently implemented")
+        files = [jira_xlsx_path_VR16, jira_xlsx_path_HVAC, jira_CSV_Path]
+        if check_files_timeliness(files) != True:
+            print("Ihre Jira Dateien sind nicht aktuell und ihr skript wurde beendet")
+            exit()
+        updateLocations(tokenPath, offlinestandorteTxtPath, fehlerstandorteTxtPath, JSONSamplePath)
+        fillCBXStatusCtrl(fehlerstandorteTxtPath, offlinestandorteTxtPath, master_xlsx_path)
+        updateVR16_HVAC(jira_xlsx_path_HVAC, jira_xlsx_path_VR16, master_xlsx_path)
+        updateCurrentBugs(jira_CSV_Path, master_xlsx_path)
+        # Finished Prozess open complete file
+        os.startfile(master_xlsx_path)
+        sg.popup("Prozess Fertig")
     if event == "get Path":
         cwd = Path().cwd().parent
         print(Path(cwd, "A2WorkingSkrips/DataFiles/refreshtoken.txt"))
-    if event == "Excel mit CBX Status befüllen":
-        # FillCbxStatusPAG
-        print("load Json")
-        f = open(
-            fehlerstandorteTxtPath,
-            'r')
-        fehlerCBX = json.load(f)
-        f = open(
-            offlinestandorteTxtPath,
-            'r')
-        offlineCBX = json.load(f)
-        print("WriteStatusToXL starting")
-        WriteStatusToXL(master_xlsx_path, offlineCBX, fehlerCBX)
-        time.sleep(5)
 
     if event == "Update Locations":
-        # CBXStatusUpdate
-        cwd = Path().cwd().parent
-        print(Path(cwd, "A2WorkingSkrips/DataFiles/refreshtoken.txt"))
-        tokenPath = Path(cwd, "A2WorkingSkrips/DataFiles/refreshtoken.txt")
-        urllist = [
-            "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=FAULTED",
-            "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=INACTIVE"
-            ]
+        updateLocations(tokenPath, offlinestandorteTxtPath, fehlerstandorteTxtPath, JSONSamplePath)
+    if event == "Excel mit CBX Status befüllen":
+        fillCBXStatusCtrl(fehlerstandorteTxtPath, offlinestandorteTxtPath, master_xlsx_path)
+    if event == "HVAC und VR16 von Jira eintragen":
+        updateVR16_HVAC(jira_xlsx_path_HVAC, jira_xlsx_path_VR16, master_xlsx_path)
 
-        # askForToken()
-        s = requests.session()
-        authLoopRequest(s, tokenPath)
-        with open(tokenPath, 'r') as jsonf:
-            data = json.load(jsonf)
-            print(data['refresh_token'])
-        atoken = 'Bearer ' + data['access_token']
-        UserName = os.getlogin()
-        i = 0
-        fehlerstandorte = BackendRequestTemplate(atoken, urllist[0], s, i)  # typ = fehler
-        i = 1
-        # get_error_msg(fehlerstandorte, atoken, s)
-        offlinestandorte = BackendRequestTemplate(atoken, urllist[1], s, i)  # typ = offline
-        print(Path(cwd, "A2WorkingSkrips/DataFiles/offlinestandorte.text"))
-        offlinestandorteTxtPath = Path(cwd, "A2WorkingSkrips/DataFiles/offlinestandorte.text")
-        f = open(offlinestandorteTxtPath, 'w')
-        f.write(json.dumps(offlinestandorte))
-        authLoopRequest(s, tokenPath)
+    if event == "Current Bugs von Jira eintragen":
+        updateCurrentBugs(jira_CSV_Path, master_xlsx_path)
 
-        with open(tokenPath, 'r') as jsonf:
-            data = json.load(jsonf)
-            print(data['refresh_token'])
-        atoken = 'Bearer ' + data['access_token']
-        fehlerstandorteTxtPath = Path(cwd, "A2WorkingSkrips/DataFiles/fehlerstandorteStatus.text")
-        JSONSamplePath = Path(cwd, "A2WorkingSkrips/DataFiles/JSONsample.txt")
-        print("cpstate starting")
-        fehlerstandorteStatus = cpstate(fehlerstandorte, atoken, s, JSONSamplePath)
-        print("cpstate finished")
-        f = open(fehlerstandorteTxtPath,'w')
-        f.write(json.dumps(fehlerstandorteStatus))
+
 window.close()

@@ -1,12 +1,8 @@
-from tkinter import *
-import tkinter as tk
-from tkinter import ttk
-import sqlite3
+
 import json
 import os
 import time
 import requests
-import A3SupportingGeneralFunctions.FileManagementTools as fileMan
 from pagAutoStatus.FillCbxStatusPAG import WriteStatusToXL
 from pagAutoStatus.Jira_Bugs_to_XL import write_Bugs_to_XL
 from pagAutoStatus.Update_VR16_HVAC_xl import start_Update_from_Jira
@@ -14,8 +10,67 @@ from A2WorkingSkrips.CBXStatusUpdate import BackendRequestTemplate,cpstate,authL
 from urllib3.exceptions import InsecureRequestWarning
 from urllib3 import disable_warnings
 from A3SupportingGeneralFunctions.FileManagementTools import askForToken, check_files_timeliness
+from pathlib import Path
 
+def updateLocations(tokenPath, offlinestandorteTxtPath,fehlerstandorteTxtPath, JSONSamplePath):
+    # CBXStatusUpdate
+    urllist = [
+        "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=FAULTED",
+        "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=INACTIVE"
+    ]
 
+    # askForToken()
+    s = requests.session()
+    authLoopRequest(s, tokenPath)
+    with open(tokenPath, 'r') as jsonf:
+        data = json.load(jsonf)
+        print(data['refresh_token'])
+    atoken = 'Bearer ' + data['access_token']
+    UserName = os.getlogin()
+    i = 0
+    fehlerstandorte = BackendRequestTemplate(atoken, urllist[0], s, i)  # typ = fehler
+    i = 1
+    # get_error_msg(fehlerstandorte, atoken, s)
+    offlinestandorte = BackendRequestTemplate(atoken, urllist[1], s, i)  # typ = offline
+    f = open(offlinestandorteTxtPath, 'w')
+    f.write(json.dumps(offlinestandorte))
+    authLoopRequest(s, tokenPath)
+
+    with open(tokenPath, 'r') as jsonf:
+        data = json.load(jsonf)
+        print(data['refresh_token'])
+    atoken = 'Bearer ' + data['access_token']
+    print("cpstate starting")
+    fehlerstandorteStatus = cpstate(fehlerstandorte, atoken, s, JSONSamplePath)
+    print("cpstate finished")
+    f = open(fehlerstandorteTxtPath, 'w')
+    f.write(json.dumps(fehlerstandorteStatus))
+
+def fillCBXStatusCtrl(fehlerstandorteTxtPath, offlinestandorteTxtPath, master_xlsx_path):
+    # FillCbxStatusPAG
+    print("load Json")
+    f = open(
+        fehlerstandorteTxtPath,
+        'r')
+    fehlerCBX = json.load(f)
+    f = open(
+        offlinestandorteTxtPath,
+        'r')
+    offlineCBX = json.load(f)
+    print("WriteStatusToXL starting")
+    WriteStatusToXL(master_xlsx_path, offlineCBX, fehlerCBX)
+    time.sleep(1)
+
+def updateVR16_HVAC(jira_xlsx_path_HVAC, jira_xlsx_path_VR16, master_xlsx_path):
+    # Update_VR16_HVAC_xl
+    print("start_Update_from_Jira starting")
+    start_Update_from_Jira(jira_xlsx_path_HVAC, jira_xlsx_path_VR16, master_xlsx_path)
+    time.sleep(1)
+
+def updateCurrentBugs(jira_CSV_Path, master_xlsx_path):
+    # Jira_Bugs_to_XL
+    write_Bugs_to_XL(jira_CSV_Path, master_xlsx_path)
+    time.sleep(1)
 
 if __name__ == "__main__":
 
