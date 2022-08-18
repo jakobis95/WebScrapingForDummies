@@ -13,35 +13,8 @@ from pagAutoStatus.Update_VR16_HVAC_xl import start_Update_from_Jira
 from A2WorkingSkrips.CBXStatusUpdate import BackendRequestTemplate,cpstate,authLoopRequest,get_error_msg
 from urllib3.exceptions import InsecureRequestWarning
 from urllib3 import disable_warnings
+from A3SupportingGeneralFunctions.FileManagementTools import askForToken, check_files_timeliness
 
-
-def check_files_timeliness(files):
-    uptodate = True
-    for file in files:
-        if fileMan.is_uptodate(file):
-            print("uptodate\n ->>", file)
-        else:
-            print("NOT UPTODATE\n ->>", file)
-            uptodate = False
-
-    if uptodate == False:
-        print("Outdated File detected!!!, you want to continue anyway?")
-        decision = False
-        while decision != True:
-            response = input("Press y to continue or n to terminate programm")
-            if response == "y":
-                decision = True
-                return True
-            if response == "n":
-                decision = True
-                return False
-    else:
-        return True
-def askForToken():
-    tokentxt = input("Bitte geben Sie einen aktuellen Authentifizierungstoken ein und bestätigen Sie mit Enter")
-    with open(tokenPath, 'w') as f:
-        f.write(tokentxt)
-    f.close()
 
 
 if __name__ == "__main__":
@@ -66,7 +39,7 @@ if __name__ == "__main__":
             "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=500&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC&status=INACTIVE"
             ]
 
-    #askForToken()
+    #askForToken(tokenPath)
     s = requests.session()
     authLoopRequest(s, tokenPath)
     with open(tokenPath, 'r') as jsonf:
