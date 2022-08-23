@@ -1,14 +1,6 @@
 import PySimpleGUI as sg
 from pathlib import Path
-import json
 import os
-import time
-import requests
-import A3SupportingGeneralFunctions.FileManagementTools as fileMan
-from pagAutoStatus.FillCbxStatusPAG import WriteStatusToXL
-from pagAutoStatus.Jira_Bugs_to_XL import write_Bugs_to_XL
-from pagAutoStatus.Update_VR16_HVAC_xl import start_Update_from_Jira
-from A2WorkingSkrips.CBXStatusUpdate import BackendRequestTemplate,cpstate,authLoopRequest,get_error_msg
 from urllib3.exceptions import InsecureRequestWarning
 from urllib3 import disable_warnings
 from Main import updateLocations, fillCBXStatusCtrl, updateVR16_HVAC, updateCurrentBugs
@@ -22,24 +14,31 @@ tokenPath = Path(cwd, "A2WorkingSkrips/DataFiles/refreshtoken.txt")
 JSONSamplePath = Path(cwd, "A2WorkingSkrips/DataFiles/JSONsample.txt")
 #Temp Programm parts
 UserName = os.getlogin()
-jira_xlsx_path_HVAC = "C:\\Users\\" + str(UserName) + "\\Downloads\\HVACOverview.xlsx"
-jira_xlsx_path_VR16 = "C:\\Users\\" + str(UserName) + "\\Downloads\\VR16UpdatedStations.xlsx"
-master_xlsx_path = "C:\\Users\\" + str(UserName) + "\\Downloads\\IBN_Tracking.xlsx"
-jira_CSV_Path = "C:\\Users\\" + str(UserName) + "\\Downloads\\current_bugs.xlsx"
+downloads = Path(Path.home(), "Downloads")
+jira_xlsx_path_HVAC = Path(downloads, "HVACOverview.xlsx")
+jira_xlsx_path_VR16 = jira_xlsx_path_HVAC.with_name("VR16UpdatedStations.xlsx")
+master_xlsx_path = jira_xlsx_path_HVAC.with_name("IBN_Tracking.xlsx")
+jira_CSV_Path = jira_xlsx_path_HVAC.with_name("current_bugs.xlsx")
 
 layout = [
-    [sg.Text("CBX Doc Update Tool")],
-    [sg.Button("Run All")],
-    [sg.Button("Update Locations")],
-    [sg.Button("get Path")],
-    [sg.Button("Excel mit CBX Status befüllen")],
-    [sg.Button("HVAC und VR16 von Jira eintragen")],
-    [sg.Button("Current Bugs von Jira eintragen")],
-    [sg.Button("Exit")]
+    [sg.Button("Start", font=["Helvetica", 15], button_color='green', size=(20,1))],
+    [sg.Text("Wochenübersichtstabelle", size=(15,1)),sg.Input(default_text=master_xlsx_path, key="-XL-"),sg.FileBrowse()],
+    [sg.Text("HVAC xlsx Datei", size=(15,1)),sg.Input(default_text=jira_xlsx_path_HVAC, key="-XL-"),sg.FileBrowse()],
+    [sg.Text("VR16 xlsx Datei", size=(15,1)),sg.Input(default_text=jira_xlsx_path_VR16, key="-XL-"),sg.FileBrowse()],
+    [sg.Text("Current Bugs Datei", size=(15,1)),sg.Input(default_text=jira_CSV_Path, key="-XL-"),sg.FileBrowse()],
+    [sg.Text("Teilfunktionen:",font=("Helvetica",15))],
+    [sg.Button("Update Locations",size=(30,1))],
+    #[sg.Button("get Path")],
+    [sg.Button("Excel mit CBX Status befüllen",size=(30,1))],
+    [sg.Button("HVAC und VR16 von Jira eintragen",size=(30,1))],
+    [sg.Button("Current Bugs von Jira eintragen",size=(30,1))],
+    [sg.Button("Exit", button_color="red", size=(30,1))]
 ]
 
 # create the window
 window = sg.Window("CDUT", layout)
+
+# pre fill Input field
 
 # create an event loop
 while True:
