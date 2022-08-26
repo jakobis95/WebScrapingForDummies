@@ -93,7 +93,7 @@ def auswertungBackenddaten(obj, atoken, s, filepath, MinutesBetweenUpdates):
     j = 1
     CPlist = []
     curDateTime = datetime.today()
-    file = open("DataFiles/lastHumidityUpdateLog", "r+")
+    file = open("lastHumidityUpdateLog", "r+")
     lastHumidityUpdateLog= file.read()
     if lastHumidityUpdateLog == None:
         print("Kein letztes Update dokumentier")
@@ -123,7 +123,7 @@ def auswertungBackenddaten(obj, atoken, s, filepath, MinutesBetweenUpdates):
                 printProgressBar(i + 1, l, prefix='Humidity Update Progress:', suffix='Complete', length=50)
                 j= j +1
                 i = i +1
-        lastHumidityUpdateLog = open("DataFiles/lastHumidityUpdateLog", "w")
+        lastHumidityUpdateLog = open("lastHumidityUpdateLog", "w")
         lastHumidityUpdateLog.write(str(curDateTime))
 
     i = 1
@@ -182,14 +182,14 @@ if __name__ == "__main__":
 
     #filepath = "C:\\Users\\FO4A5OY\\OneDrive - Dr. Ing. h.c. F. Porsche AG\\General\\Task Force HVAC\\Feuchte_Overview_CBX.xlsx"
     authLoopRequest(s)
-    with open('DataFiles/refreshtoken.txt', 'r') as jsonf:
+    with open('../A1_Working_Skripts/DataFiles/refreshtoken.txt', 'r') as jsonf:
         data = json.load(jsonf)
         print("vergleich")
         print(data['refresh_token'])
     atoken = 'Bearer ' + data['access_token']
     data = BackendRequestTemplate(atoken, url, s)
     data = OnlyUsableDestinations(data)
-    f = open("DataFiles/UsableDestinationsDaily.txt", 'w')
+    f = open("CablepressureAnalysis/UsableDestinationsDaily.txt", 'w')
     f.write(json.dumps(data))
     auswertungBackenddaten(data, atoken, s, filepath, MinutesBetweenUpdates=30)
 

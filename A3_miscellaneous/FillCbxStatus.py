@@ -117,13 +117,13 @@ if __name__ == "__main__":
     UserName = os.getlogin()
     xlsxPfad = "C:\\Users\\" + str(UserName) + "\\OneDrive - Dr. Ing. h.c. F. Porsche AG\\General\\Task Force HVAC\\PythonSkripteZurBackendAnalyse\\CBX_Fehlerliste_AutoPyTesting.xlsx"
 
-    f = open("DataFiles/fehlerstandorteStatus.text", 'r')
+    f = open("../A1_Working_Skripts/DataFiles/fehlerstandorteStatus.text", 'r')
     fehlerCBX = json.load(f)
     for element in fehlerCBX:
         for item in element:
             print(item)
 
-    f = open("DataFiles/offlinestandorte.text", 'r')
+    f = open("../A1_Working_Skripts/DataFiles/offlinestandorte.text", 'r')
     offlineCBX = json.load(f)
     for element in offlineCBX:
         print(element)

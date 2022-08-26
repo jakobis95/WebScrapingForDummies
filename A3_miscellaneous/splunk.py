@@ -61,7 +61,7 @@ if __name__ == "__main__":
     jLKmeas = json.loads(LKmeas)
     jCBCmeas = json.loads(CBCmeas)
 
-    with open('DataFiles/refreshtoken.txt', 'r') as jsonf:
+    with open('../A1_Working_Skripts/DataFiles/refreshtoken.txt', 'r') as jsonf:
         data = json.load(jsonf)
         print("vergleich")
         print(data['refresh_token'])
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     atoken = 'Bearer ' + data['access_token']
     data = BackendRequestTemplate(atoken, url, s)
     data = OnlyUsableDestinations(data)
-    f = open("DataFiles/UsableDestinationsDaily.txt", 'w')
+    f = open("CablepressureAnalysis/UsableDestinationsDaily.txt", 'w')
     f.write(json.dumps(data))
     df = pd.DataFrame(data)
     df["group"] = df["uniqueId"].apply(cutId)
@@ -92,7 +92,7 @@ if __name__ == "__main__":
         j = j + 1
         if j % 100 == 0:
             authLoopRequest(s)
-            with open('DataFiles/refreshtoken.txt', 'r') as jsonf:
+            with open('../A1_Working_Skripts/DataFiles/refreshtoken.txt', 'r') as jsonf:
                 token = json.load(jsonf)
             atoken = 'Bearer ' + token['access_token']
     i = 0
@@ -118,7 +118,7 @@ if __name__ == "__main__":
         i = i + 1
         if i % 100 == 0:
             authLoopRequest(s)
-            with open('DataFiles/refreshtoken.txt', 'r') as jsonf:
+            with open('../A1_Working_Skripts/DataFiles/refreshtoken.txt', 'r') as jsonf:
                 token = json.load(jsonf)
             atoken = 'Bearer ' + token['access_token']
         #if i >= 10:

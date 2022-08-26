@@ -167,7 +167,7 @@ def BackendRequestTemplate(atoken, url, s, i):
 
 def refreshT(s): # Hier wird der Token refreshed
     #die verwendete Json datei wird aus dem Browser kopiert
-    tokenPath = 'C:/Users/AJ2MSGR/PycharmProjects/WebScrapingForDummies/A2WorkingSkrips/DataFiles/refreshtoken.txt'
+    tokenPath = 'A1_Working_Skripts/DataFiles/refreshtoken.txt'
     with open(tokenPath, 'r') as jsonf:
         data = json.load(jsonf)
         print(data['refresh_token'])
@@ -190,24 +190,36 @@ def refreshT(s): # Hier wird der Token refreshed
         'client_id' : 'cpoc-frontend'
         }
 
+    try:
+        p = s.post(url, headers=headers, verify=False, data = payload )
+        print(p)
+        with open(tokenPath, 'w') as f:
+            f.write(p.text)
 
-    p = s.post(url, headers=headers, verify=False, data = payload )
-    print(p)
-    with open(tokenPath, 'w') as f:
-        f.write(p.text)
+    except:
+        print("Ihr Netzwerk hat die Anfrage blockiert, überprüfen Sie ob Sie sich im richtigen Netzwerk befinden")
+        p = False
     return p
 
 def authLoopRequest(s, tokenPath):
-    p = 999
-    p = refreshT(s)
-    while p.status_code != 200:
-        if p.status_code != 200:
-            print("Ihr aktueller Token ist abgelaufen")
-            tokentxt = input("Bitte geben Sie einen gültigen Token ein und bestätigen mit Enter:")
-            with open(tokenPath, 'w') as f:
-                f.write(tokentxt)
-                f.close()
+    p = False
+    while p == False:
+        try:
             p = refreshT(s)
+            print( p)
+            while p.status_code != 200:
+                flag = True
+                if p.status_code != 200:
+                    print("Ihr aktueller Token ist abgelaufen")
+                    tokentxt = input("Bitte geben Sie einen gültigen Token ein und bestätigen mit Enter:")
+                    with open(tokenPath, 'w') as f:
+                        f.write(tokentxt)
+                        f.close()
+                    p = refreshT(s)
+        except:
+            p = False
+            input("Nochmal Starten, Enter drücken")
+
     print("auth erfolgreich")
 
 

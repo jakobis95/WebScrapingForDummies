@@ -1,13 +1,8 @@
-import json
+
 import os
-import msoffcrypto
-import io
-from openpyxl import load_workbook, styles
-from openpyxl.styles import Font, Color
-from openpyxl.styles import Alignment
-from A3SupportingGeneralFunctions.NavigateInExcel import searchXL
-from datetime import datetime
-import pandas as pd
+from openpyxl import load_workbook
+from A2_Working_Support_Functions.NavigateInExcel import searchXL
+
 def update_HVAC_Status(jira_Worksheet, destination_Worksheet, index_column, destination_update_column, destination_index_column, type):
     i = 1
 
@@ -23,7 +18,7 @@ def update_HVAC_Status(jira_Worksheet, destination_Worksheet, index_column, dest
     destination_update_column = coordinates[1]
     coordinates = searchXL(destination_Worksheet, destination_index_column)
     destination_index_column = coordinates[1]
-    print(type, "###############################")
+    print("\n", type, "###############################")
     while jira_Worksheet.cell(row=i, column=issue_column).value != None:
         if jira_Worksheet.cell(row=i, column=issue_column).value != "Epic":
             jira_Worksheet.cell(row=i, column=index_column).value = jira_Worksheet.cell(row=i, column=epic_column).value

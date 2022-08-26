@@ -160,7 +160,7 @@ def create_empty_json(Session, atoken, Filename):
 
 def refreshT(s): # Hier wird der Token refreshed
     #die verwendete Json datei wird aus dem Browser kopiert
-    with open('DataFiles/refreshtoken.txt', 'r') as jsonf:
+    with open('../A1_Working_Skripts/DataFiles/refreshtoken.txt', 'r') as jsonf:
         data = json.load(jsonf)
         #print(data['refresh_token'])
 
@@ -186,10 +186,10 @@ def refreshT(s): # Hier wird der Token refreshed
     p = s.post(url, headers=headers, verify=False, data = payload )
     #print(p)
 
-    with open('DataFiles/refreshtoken.txt', 'w') as f:
+    with open('../A1_Working_Skripts/DataFiles/refreshtoken.txt', 'w') as f:
         f.write(p.text)
 
-    with open('DataFiles/refreshtoken.txt', 'r') as jsonf:
+    with open('../A1_Working_Skripts/DataFiles/refreshtoken.txt', 'r') as jsonf:
         data = json.load(jsonf)
         #print("vergleich")
         #print( data['refresh_token'])
@@ -199,7 +199,7 @@ def refreshT(s): # Hier wird der Token refreshed
 
 
 if __name__ == '__main__':
-    Filename = 'DataFiles/TransactionData.txt'
+    Filename = 'TransactionData.txt'
     Filename2 = 'TransactionData5.txt'
     XLSXname = 'TransactionData5.xlsx'
     CPsListname = 'AllCPs.text'
@@ -209,7 +209,7 @@ if __name__ == '__main__':
 
     authLoopRequest(s)
 
-    with open('DataFiles/refreshtoken.txt', 'r') as jsonf:
+    with open('../A1_Working_Skripts/DataFiles/refreshtoken.txt', 'r') as jsonf:
         data = json.load(jsonf)
         print("vergleich")
         print( data['refresh_token'])

@@ -1,11 +1,8 @@
-import json
+
 import os
-from openpyxl import load_workbook, styles
-from openpyxl.styles import Font, Color
-from openpyxl.styles import Alignment
-from A3SupportingGeneralFunctions.NavigateInExcel import searchXL
-from datetime import datetime
-import pandas as pd
+from openpyxl import load_workbook
+from A2_Working_Support_Functions.NavigateInExcel import searchXL
+
 def update_HVAC_Status(jira_Worksheet, destination_Worksheet, index_column, destination_update_column, destination_index_column, type):
     i = 1
     coordinates = searchXL(jira_Worksheet, index_column, begin=1, rowcol="row", krit=True)
@@ -38,7 +35,11 @@ def update_HVAC_Status(jira_Worksheet, destination_Worksheet, index_column, dest
     for epic in missing_Epics:
         print(epic)
 
-def isEpicLocationMatched(MasterWorksheet, destinationWorksheet):
+def isEpicLocationMatched(MasterWorksheetPath, destinationWorksheetPath):
+    wb_today = load_workbook(filename=destinationWorksheetPath)
+    destinationWorksheet = wb_today["STATUS"]
+    wb_master = load_workbook(filename=MasterWorksheetPath)
+    MasterWorksheet = wb_master["STATUS"]
     coordinates = searchXL(MasterWorksheet, "Jira Epic", begin=1, rowcol="row", krit=True)
     ref_epic_column = coordinates[1]
     coordinates = searchXL(MasterWorksheet, "Location", begin=1, rowcol="row", krit=True)
@@ -52,7 +53,7 @@ def isEpicLocationMatched(MasterWorksheet, destinationWorksheet):
     coordinates = searchXL(destinationWorksheet, "Dealer Number", begin=1, rowcol="row", krit=True)
     dealer_column = coordinates[1]
 
-    print(type, "###############################")
+    print("######### Starte Abgleich ###########")
 
     i = coordinates[0] + 1
     missing_Epics = []
@@ -102,11 +103,12 @@ def isEpicLocationMatched(MasterWorksheet, destinationWorksheet):
                     missing_Epics.append(Str)
                 else:
                     notFoundLocation.append(Str)
-                print("Coordinaten Epic: ", coordinates[0], coordinates[1])
+                #print("Coordinaten Epic: ", coordinates[0], coordinates[1])
                 break
 
         i = i + 1
-    print("Epic or Dealernumber dont Match:")
+    print("######### Abgleich Beendet ###########")
+    print("\nEpic or Dealernumber dont Match:")
     for epic in missing_Epics:
         print(epic)
     print("\nLocation cant be found:")
@@ -127,7 +129,7 @@ if __name__ == "__main__":
     wb_jira = load_workbook(filename=jira_xlsx_path_HVAC)
     jira_ws_HVAC = wb_jira["Sheet1"]
 #Skriptaufrufe
-    update_HVAC_Status(jira_ws_HVAC, status_ws, "Key", "HVAC Maßnahme\numgesetzt (WMQ1)", "Jira Epic", "HVAC")
-    #isEpicLocationMatched(master_status_ws, status_ws)
+    #update_HVAC_Status(jira_ws_HVAC, status_ws, "Key", "HVAC Maßnahme\numgesetzt (WMQ1)", "Jira Epic", "HVAC")
+    isEpicLocationMatched(master_xlsx_path, today_ibn_path)
     os.startfile(master_xlsx_path)
     os.startfile(today_ibn_path)

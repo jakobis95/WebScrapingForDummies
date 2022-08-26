@@ -1,3 +1,0 @@
--Dateipfade so ändern das Sie auf working directorie verweisen
--Button für die Funktion CBX Wochenübersicht erstellen
--Aktuelle Version nochmal Testen und mit Original mergen

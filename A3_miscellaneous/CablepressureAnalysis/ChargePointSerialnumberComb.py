@@ -12,7 +12,7 @@ if __name__ == "__main__":
     #Column serielnumber Chargepoints
     #columnSerialNr = searchXL(WB, 'Ladesäule')[1]
     columnSerialNr = 11
-    data = open("../A2WorkingSkrips/DataFiles/UsableDestinationsDaily.txt")
+    data = open("UsableDestinationsDaily.txt")
     Udesti = json.load(data)
     CityM1 = "City"
     RowM1 = "notFound"
@@ -29,5 +29,5 @@ if __name__ == "__main__":
             CityM1 = element['address']['city']
         print(element['serialNumber'], " City:", element['address']['city'], " seriennummer:", SerialNumber)
 
-        data = open("../A2WorkingSkrips/DataFiles/UsableDestinationsDaily.txt")
+        data = open("UsableDestinationsDaily.txt")
         Udesti = json.load(data)

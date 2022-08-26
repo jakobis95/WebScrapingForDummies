@@ -245,7 +245,7 @@ def CpPressureToXl101(data, atoken, s):
 def GetAToken(s):
     url = "https://api.chargepoint-management.com/chargepoint/chargepoints/list?page=0&size=1000&sort=masterData.chargePointName,asc&masterData.chargingFacilities.powerType=DC"
     authLoopRequest(s)
-    with open('DataFiles/refreshtoken.txt', 'r') as jsonf:
+    with open('../A1_Working_Skripts/DataFiles/refreshtoken.txt', 'r') as jsonf:
         data = json.load(jsonf)
         print("vergleich")
         print(data['refresh_token'])
@@ -262,7 +262,7 @@ if __name__ == "__main__":
     #with open("UsableDestinationsDaily.txt", 'w') as f:
         #json.dump(AllCBXcp, f)
 
-    f = open("DataFiles/UsableDestinationsDaily.txt", 'r')
+    f = open("CablepressureAnalysis/UsableDestinationsDaily.txt", 'r')
     CPplaces = json.load(f)
     for CP in CPplaces:
         #print(CP)

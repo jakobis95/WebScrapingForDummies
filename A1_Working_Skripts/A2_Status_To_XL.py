@@ -1,11 +1,11 @@
 import json
 import os
 from openpyxl import load_workbook, styles
-from openpyxl.styles import Font, Color
-from A3SupportingGeneralFunctions.NavigateInExcel import searchXL
+from openpyxl.styles import Font
+from A2_Working_Support_Functions.NavigateInExcel import searchXL
 from datetime import datetime
-from UserInterface.AddC import addColToRef,addCol, update, replaceTab
-import cProfile
+from A2_Working_Support_Functions.AddC import addColToRef,addCol, update, replaceTab
+
 def XXprintProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█'):
     """
     Call in a loop to create terminal progress bar
@@ -249,14 +249,14 @@ if __name__ == "__main__":
     # xlsxPfadFeedback = "C:\\Users\\" + str(UserName) + "\\Desktop\\TrackingFeedback.xlsx"
 
     f = open(
-        "C:/Users/AJ2MSGR/PycharmProjects/WebScrapingForDummies/A2WorkingSkrips/DataFiles/fehlerstandorteStatus.text",
+        "/A1_Working_Skripts/DataFiles/fehlerstandorteStatus.text",
         'r')
     fehlerCBX = json.load(f)
     # for element in fehlerCBX:
     #     for item in element:
     #         print(item)
     #
-    f = open("C:/Users/AJ2MSGR/PycharmProjects/WebScrapingForDummies/A2WorkingSkrips/DataFiles/offlinestandorte.text",
+    f = open("/A1_Working_Skripts/DataFiles/offlinestandorte.text",
              'r')
     offlineCBX = json.load(f)
     # for element in offlineCBX:

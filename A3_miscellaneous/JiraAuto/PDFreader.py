@@ -1,6 +1,5 @@
 # importing required modules
 import PyPDF4
-import pprint
 import os
 from os.path import exists
 

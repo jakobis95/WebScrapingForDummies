@@ -3,14 +3,14 @@ import json
 import os
 import time
 import requests
-from pagAutoStatus.FillCbxStatusPAG import WriteStatusToXL
-from pagAutoStatus.Jira_Bugs_to_XL import write_Bugs_to_XL
-from pagAutoStatus.Update_VR16_HVAC_xl import start_Update_from_Jira
-from A2WorkingSkrips.CBXStatusUpdate import BackendRequestTemplate,cpstate,authLoopRequest,get_error_msg
+from A1_Working_Skripts.A2_Status_To_XL import WriteStatusToXL
+from A1_Working_Skripts.A4_Jira_Bugs_to_XL import write_Bugs_to_XL
+from A1_Working_Skripts.A3_VR16_HVAC_To_XL import start_Update_from_Jira
+from A1_Working_Skripts.A1_Update_Status_from_CPM import BackendRequestTemplate,cpstate,authLoopRequest
 from urllib3.exceptions import InsecureRequestWarning
 from urllib3 import disable_warnings
-from A3SupportingGeneralFunctions.FileManagementTools import askForToken, check_files_timeliness
-from pathlib import Path
+from A2_Working_Support_Functions.FileManagementTools import  check_files_timeliness
+from A1_Working_Skripts.A5_Jira_Epic_Abgleich import isEpicLocationMatched
 
 def updateLocations(tokenPath, offlinestandorteTxtPath,fehlerstandorteTxtPath, JSONSamplePath):
     # CBXStatusUpdate
@@ -63,7 +63,7 @@ def fillCBXStatusCtrl(fehlerstandorteTxtPath, offlinestandorteTxtPath, master_xl
 
 def updateVR16_HVAC(jira_xlsx_path_HVAC, jira_xlsx_path_VR16, master_xlsx_path):
     # Update_VR16_HVAC_xl
-    print("start_Update_from_Jira starting")
+    print("\nstart_Update_from_Jira starting")
     start_Update_from_Jira(jira_xlsx_path_HVAC, jira_xlsx_path_VR16, master_xlsx_path)
     time.sleep(1)
 
@@ -71,6 +71,9 @@ def updateCurrentBugs(jira_CSV_Path, master_xlsx_path):
     # Jira_Bugs_to_XL
     write_Bugs_to_XL(jira_CSV_Path, master_xlsx_path)
     time.sleep(1)
+
+def jiraEpicAbgleich(Master_XLSX_Path, destination_XLSX_Path):
+    isEpicLocationMatched(Master_XLSX_Path,destination_XLSX_Path)
 
 if __name__ == "__main__":
 

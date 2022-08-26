@@ -1,11 +1,9 @@
-import json
+
 import os
-from openpyxl import load_workbook, styles
-from openpyxl.styles import Font, Color
+from openpyxl import load_workbook
 from openpyxl.styles import Alignment
-from A3SupportingGeneralFunctions.NavigateInExcel import searchXL
-from datetime import datetime
-import pandas as pd
+from A2_Working_Support_Functions.NavigateInExcel import searchXL
+
 def create_active_issue_String(JiraBugs, i, columnDict):
     Date = str(JiraBugs.cell(row=i, column=columnDict["Updated"]).value[:5])
     IssueKey = str(JiraBugs.cell(row=i, column=columnDict["Key"]).value)
