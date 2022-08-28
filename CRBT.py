@@ -1,12 +1,20 @@
-import PySimpleGUI as sg
-from pathlib import Path
-import os
-from urllib3.exceptions import InsecureRequestWarning
-from urllib3 import disable_warnings
+## Python Packages: hier sollte nicht rot unterstrichen sein auch nicht wenn der text ausgegraut sein sollte.
+import PySimpleGUI as sg                                # PySimpleGUI Package
+from urllib3.exceptions import InsecureRequestWarning   # urllib3 Package
+from urllib3 import disable_warnings                    # urllib3 Package
+from openpyxl import styles                             # openpyxlPackage
+import openpyxl_utilities                               # openpyxl_utilities Package
+import requests                                         # requests Package
+## ende Python Packages
+
+#Standard
+from pathlib import Path                                # in standardmaeßig enthalten
+import os                                               # in standardmaeßig enthalten
+import webbrowser                                       # in standardmaeßig enthalten
+# ende Standard
+
 from A1_Working_Skripts.main import updateLocations, fillCBXStatusCtrl, updateVR16_HVAC, updateCurrentBugs, jiraEpicAbgleich
 from A2_Working_Support_Functions.FileManagementTools import check_files_timeliness
-import webbrowser
-
 # Path needed
 disable_warnings(InsecureRequestWarning)
 cwd = Path().cwd()
@@ -33,11 +41,11 @@ layout = [
     [sg.Text("Current Bugs Datei:", size=(15,1)),sg.Input(default_text=jira_CSV_Path, key="-Current-", size=(w,h)),sg.FileBrowse()],
     [sg.Text("Jira Master Datei:", size=(15,1)),sg.Input(default_text=jira_Master_XLSX, key="-Master-", size=(w,h)),sg.FileBrowse()],
     [sg.Text("Teilfunktionen:",font=("Helvetica",15))],
+    [sg.Button("Start ohne CPM Status updaten", button_color='lightgreen', size=(30,1))],
     [sg.Button("CPM Status updaten",size=(30,1))],
-    #[sg.Button("get Path")],
     [sg.Button("CBX Zustand in Excel aktualisieren",size=(30,1))],
     [sg.Button("HVAC und VR16 von Jira eintragen",size=(30,1))],
-    [sg.Button("Current Bugs von Jira eintragen",size=(30,1))],
+    [sg.Button("Offene Tickets von Jira eintragen",size=(30,1))],
     [sg.Button("Jira Epic Abgleich",size=(30,1))],
     [sg.Text('_'*120)],
     [sg.Button("Exit", button_color="red", size=(30,1)), sg.Button("Anleitung", size=(30,1))]
@@ -76,9 +84,11 @@ while True:
         os.startfile(values["-XL-"])
         sg.popup("Prozess Fertig")
     if event == "get Path":
-        cwd = Path().cwd().parent
-        print(Path(cwd, "A1_Working_Skripts/DataFiles/refreshtoken.txt"))
-
+        fillCBXStatusCtrl(fehlerstandorteTxtPath, offlinestandorteTxtPath, values["-XL-"])
+        updateVR16_HVAC(values["-HVAC-"], values["-VR16-"], values["-XL-"])
+        updateCurrentBugs(values["-Current-"], values["-XL-"])
+        sg.popup("Prozess Fertig")
+        os.open(master_xlsx_path)
     if event == "CPM Status updaten":
         updateLocations(tokenPath, offlinestandorteTxtPath, fehlerstandorteTxtPath, JSONSamplePath)
         sg.popup("Prozess Fertig")
@@ -91,7 +101,7 @@ while True:
         updateVR16_HVAC(values["-HVAC-"], values["-VR16-"], values["-XL-"])
         sg.popup("Prozess Fertig")
         os.open(master_xlsx_path)
-    if event == "Current Bugs von Jira eintragen":
+    if event == "Offene Tickets von Jira eintragen":
         updateCurrentBugs(values["-Current-"], values["-XL-"])
         sg.popup("Prozess Fertig")
         os.open(master_xlsx_path)

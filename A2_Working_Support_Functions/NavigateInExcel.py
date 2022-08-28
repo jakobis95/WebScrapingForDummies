@@ -1,12 +1,10 @@
-from openpyxl import Workbook
+
 import openpyxl
 import os
-from openpyxl import Workbook
-from datetime import datetime
 from openpyxl.formatting.rule import ColorScale, FormatObject, CellIsRule
-from openpyxl.styles import Color, PatternFill, Font, Border
-from openpyxl.utils.cell import coordinate_to_tuple, get_column_letter
-from openpyxl.styles.differential import DifferentialStyle
+from openpyxl.styles import Color, PatternFill, Font
+from openpyxl.utils.cell import coordinate_to_tuple
+
 """
     Hallo das ist ein gut lesbares Kommentar
 """
